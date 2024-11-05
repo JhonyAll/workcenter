@@ -1,0 +1,21 @@
+.inputAnimation {
+    animation: moveAnimation 4s;
+}
+
+@keyframes moveAnimation {
+    0% {
+        transform: translateX(0);
+    }
+    50% {
+        transform: translateX(-600px);
+        opacity: 0;
+    }
+    50.1% {
+        transform: translateX(600px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
