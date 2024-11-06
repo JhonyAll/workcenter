@@ -1,12 +1,17 @@
+// Importação das dependências necessárias
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import cleanUserPasswords from "@/utils/cleanUsersPassword";
 import encryptPassword from "@/utils/encryptPassword";
 
+// Função para a requisição GET
 export async function GET(req: NextRequest) {
   try {
+    // Recupera os usuários do banco e limpa as senhas antes de enviar
     const users = cleanUserPasswords(await prisma.user.findMany());
+
+    // Retorna os dados dos usuários com um status de sucesso
     return NextResponse.json(
       {
         status: "success",
@@ -17,6 +22,7 @@ export async function GET(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    // Em caso de erro, loga e retorna um erro genérico
     console.log(error);
     return NextResponse.json(
       {
@@ -29,12 +35,16 @@ export async function GET(req: NextRequest) {
   }
 }
 
+// Função para a requisição POST
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { username, password, type, name, email, profilePhoto } = body;
-  try {
-    const hashedPassword = await encryptPassword(password)
 
+  try {
+    // Criptografa a senha antes de salvar no banco
+    const hashedPassword = await encryptPassword(password);
+
+    // Cria um novo usuário no banco de dados
     const user = await prisma.user.create({
       data: {
         username,
@@ -46,7 +56,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    user.password = ''
+    // Remove a senha do objeto de resposta para segurança
+    user.password = '';
+
+    // Retorna os dados do novo usuário com status de sucesso
     return NextResponse.json(
       {
         status: "success",
@@ -57,6 +70,7 @@ export async function POST(req: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
+    // Em caso de erro, loga e retorna um erro genérico
     console.log(error);
     return NextResponse.json(
       {

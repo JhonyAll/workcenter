@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import InputComponent from "@/components/Input";
 import Link from "next/link";
@@ -12,6 +12,7 @@ import ButtonComponent from "../Button";
 export default function SignUpBox() {
     const [nameValue, setNameValue] = useState("");
     const [emailValue, setEmailValue] = useState("");
+    const [usernameValue, setUsernameValue] = useState("");
     const [passwordValue, setPasswordValue] = useState("");
     const [confirmPasswordValue, setConfirmPasswordValue] = useState("");
     const [showPasswordFields, setShowPasswordFields] = useState(false);
@@ -130,7 +131,7 @@ export default function SignUpBox() {
                                 >
                                     <InputComponent
                                         name="name"
-                                        text="Nome e sobrenome"
+                                        text="Nome Completo"
                                         typeInput="text"
                                         changeState={setNameValue}
                                         state={nameValue}
@@ -152,6 +153,23 @@ export default function SignUpBox() {
                                         typeInput="text"
                                         changeState={setEmailValue}
                                         state={emailValue}
+                                    />
+                                </motion.div>
+                                <motion.div
+                                    key="username"
+                                    className="w-full h-14 relative"
+                                    initial={{ x: 0, opacity: 1 }}
+                                    animate={{ x: 0, opacity: 1 }}
+                                    exit={{ x: -100, opacity: 0 }}
+                                    transition={{ duration: 0.5 }}
+                                >
+                                    <InputComponent
+                                        name="username"
+                                        text="Username"
+                                        bgColor="bg-gray-900"
+                                        typeInput="text"
+                                        changeState={setUsernameValue}
+                                        state={usernameValue}
                                     />
                                 </motion.div>
                             </>

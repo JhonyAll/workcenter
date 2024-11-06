@@ -9,7 +9,7 @@ import Image from "next/image";
 import planetLogo from '@/assets/img/planet-logo.svg'
 import { redirect } from "next/navigation";
 
-export default function SignIn() {
+export default function SignInBox() {
     const [reveledPassword, setReveledPassword] = useState(false);
     const [emailValue, setEmailValue] = useState("");
     const [passwordValue, setPasswordValue] = useState("");
