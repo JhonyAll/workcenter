@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { headers } from "next/headers";
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -40,7 +41,10 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  return NextResponse.next();
+  const headers = new Headers(req.headers);
+  headers.set("x-current-path", req.nextUrl.pathname);
+
+  return NextResponse.next({ headers });
 }
 
 export const config = {

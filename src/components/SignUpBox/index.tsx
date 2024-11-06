@@ -64,7 +64,7 @@ export default function SignUpBox() {
         setIsSubmitting(true);
 
         const body = {
-            username: "user1", // Envia "user1" no corpo da requisição
+            username: usernameValue,
             password: passwordValue,
             type: selectedOption?.toUpperCase(),
             name: nameValue,
