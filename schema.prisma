@@ -10,31 +10,48 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
+// Adicionando um modelo Post ao schema
 model Post {
-  id        String  @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean @default(false)
-  author    User?   @relation(fields: [authorId], references: [id])
-  authorId  String?
+  id          String   @id @default(uuid())
+  title       String
+  content     String
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now()) @map(name: "created_at")
+  updatedAt   DateTime @updatedAt @map(name: "updated_at")
 }
 
 model User {
-  id        String   @id @default(uuid())
-  username  String   @unique
-  password  String
-  type      UserType @default(CLIENT)
-  name      String?
-  email     String?  @unique
-  profilePhoto String
-  createdAt DateTime @default(now()) @map(name: "created_at")
-  updatedAt DateTime @updatedAt @map(name: "updated_at")
-  posts     Post[]
-  Token     Token[]
+  id              String       @id @default(uuid())
+  username        String       @unique
+  password        String
+  type            UserType     @default(CLIENT)
+  name            String?
+  email           String?      @unique
+  profilePhoto    String
+  createdAt       DateTime     @default(now()) @map(name: "created_at")
+  updatedAt       DateTime     @updatedAt @map(name: "updated_at")
+  posts           Post[]       // Agora este campo está correto, referenciando o modelo Post
+  tokens          Token[]
+  reviewsGiven    Review[]     @relation("ReviewReviewer")
+  reviewsReceived Review[]     @relation("ReviewReviewee")
+  professions     Profession[] @relation("UserProfessions")
+  portfolio       Portfolio[]
+  jobApplications JobApplication[]
+  jobs            Job[]        // Adicionado campo de relação reversa para Job
+  paymentsMade    Payment[]    @relation("PaymentPayer")
+  paymentsReceived Payment[]  @relation("PaymentPayee")
 
   @@map(name: "users")
 }
 
+
+enum UserType {
+  CLIENT
+  WORKER
+}
+
+// Definição de Token
 model Token {
   id        Int      @id @default(autoincrement())
   token     String   @unique
@@ -44,10 +61,96 @@ model Token {
   @@unique([token, userId])
 
   @@map(name: "tokens")
-
 }
 
-enum UserType {
-  CLIENT
-  WORKER
+// Definição de Review
+model Review {
+  id          String   @id @default(uuid())
+  rating      Int      // rating between 1 and 5
+  comment     String?
+  jobId       String
+  job         Job      @relation(fields: [jobId], references: [id])
+  reviewerId  String
+  reviewer    User     @relation("ReviewReviewer", fields: [reviewerId], references: [id]) // client who wrote the review
+  revieweeId  String
+  reviewee    User     @relation("ReviewReviewee", fields: [revieweeId], references: [id]) // worker who was reviewed
+  createdAt   DateTime @default(now())
+
+  @@map(name: "reviews")
 }
+
+// Definição de Job
+model Job {
+  id          String         @id @default(uuid())
+  title       String
+  description String
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  jobApplications JobApplication[]
+  payments    Payment[]
+  reviews     Review[]
+
+  @@map(name: "jobs")
+}
+
+// Definição de JobApplication
+model JobApplication {
+  id       String   @id @default(uuid())
+  jobId    String
+  job      Job      @relation(fields: [jobId], references: [id])
+  userId   String
+  user     User     @relation(fields: [userId], references: [id])
+  status   JobStatus
+
+  @@map(name: "job_applications")
+}
+
+// Definição de Payment
+model Payment {
+  id        String    @id @default(uuid())
+  amount    Float     // the amount paid
+  status    PaymentStatus @default(PENDING)
+  jobId     String
+  job       Job       @relation(fields: [jobId], references: [id])
+  payerId   String
+  payer     User      @relation("PaymentPayer", fields: [payerId], references: [id]) // client
+  payeeId   String
+  payee     User      @relation("PaymentPayee", fields: [payeeId], references: [id]) // worker
+  createdAt DateTime  @default(now())
+
+  @@map(name: "payments")
+}
+
+enum JobStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+// Definição de Profession
+model Profession {
+  id        String    @id @default(uuid())
+  name      String    @unique
+  workers   User[]    @relation("UserProfessions")
+
+  @@map(name: "professions")
+}
+
+// Definição de Portfolio
+model Portfolio {
+  id        String   @id @default(uuid())
+  title     String
+  description String
+  imageUrl  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map(name: "portfolios")
+}
+

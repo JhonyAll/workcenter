@@ -1,27 +1,42 @@
 import { storage } from "@/lib/firebase";
-import { getDownloadURL,ref, uploadBytesResumable } from "firebase/storage";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
-const handleUpload = (file: File) => {
-    let url;
+// Função para converter base64 para Blob
+const base64ToBlob = (base64: string) => {
+  const byteString = atob(base64.split(",")[1]);
+  const mimeString = base64.split(",")[0].split(":")[1].split(";")[0];
+  const ab = new ArrayBuffer(byteString.length);
+  const ia = new Uint8Array(ab);
+  
+  for (let i = 0; i < byteString.length; i++) {
+    ia[i] = byteString.charCodeAt(i);
+  }
+  
+  return new Blob([ab], { type: mimeString });
+};
 
-    if (!file) return;
-    
-    const storageRef = ref(storage, `images/${file.name}`);
-    const uploadTask = uploadBytesResumable(storageRef, file);
+const handleUpload = (base64: string) => {
+  const blob = base64ToBlob(base64);
 
+  const fileName = `image_${Date.now()}.png`; // Nomeia o arquivo conforme necessário
+  const storageRef = ref(storage, `images/${fileName}`);
+  const uploadTask = uploadBytesResumable(storageRef, blob);
+
+  return new Promise<string>((resolve, reject) => {
     uploadTask.on(
       "state_changed",
+      () => {},
       (error) => {
         alert(error);
+        reject(error);
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-          url = downloadURL;
+          resolve(downloadURL);
         });
       }
     );
+  });
+};
 
-    return url
-  };
-
-  export default handleUpload
+export default handleUpload;

@@ -19,3 +19,36 @@ body {
   background: #0a0a0a;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* No seu arquivo CSS global ou no próprio componente */
+aside {
+  transition: width 0.3s ease; /* Adiciona animação suave na largura */
+}
+
+aside.minimized {
+  width: 60px; /* Tamanho da sidebar minimizada */
+}
+
+/* styles/scrollbar.module.css */
+.main {
+  /* Customiza o scrollbar */
+  scrollbar-width: thin; /* Barra de rolagem fina */
+  scrollbar-color: #9b4dca #212121; /* Cor da parte visível e a parte fora da tela */
+}
+
+.main::-webkit-scrollbar {
+  width: 8px; /* Largura do scrollbar */
+}
+
+.main::-webkit-scrollbar-track {
+  background: #212121; /* Cor da parte fora da tela */
+}
+
+.main::-webkit-scrollbar-thumb {
+  background-color: #3B0764; /* Cor da barra de rolagem */
+  border-radius: 2px; /* Bordas arredondadas */
+}
+
+.main::-webkit-scrollbar-thumb:hover {
+  background-color: #451a51; /* Cor quando o usuário passa o mouse */
+}

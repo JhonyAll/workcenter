@@ -1,11 +1,8 @@
-import type { Metadata } from "next";
+// app/layout.tsx
+import { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { headers } from "next/headers";
-import path from "path";
-import Navbar from "@/components/Navbar";
-import Sidebar from "@/components/Sidebar";
-import { child } from "firebase/database";
+import ClientLayout from "@/components/ClientLayout";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -23,53 +20,17 @@ export const metadata: Metadata = {
   description: "Criado pelo grupo Z",
 };
 
-const WithNavbar = ({
+export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) => {
-  return (
-    <>
-    <Navbar />
-    <div className="grid grid-cols-12">
-      <Sidebar  auxiliarClass='grid-cols-subgrid col-span-1'/>
-      <main className='grid-cols-subgrid col-span-11'>
-      {children}
-      </main>
-    </div>
-    </>
-  )
-}
-
-const NoNavbar = ({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) => {
-  return (
-    <>
-    {children}  
-    </>
-  )
-}
-
-export default async function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) 
-  
-{
-  const header = await headers();
-  const pathname = header.get('x-current-path')
-  
+}) {
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >{
-        !(pathname === '/login' || pathname === '/signup') ? (<WithNavbar children={children}/>) : (<NoNavbar children={children} />)
-      }
+        className={`${geistSans.variable} ${geistMono.variable} antialiased max-w-screen`}
+      >
+        <ClientLayout>{children}</ClientLayout> {/* ClientLayout já contém o UserProvider */}
       </body>
     </html>
   );

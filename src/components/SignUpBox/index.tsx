@@ -1,13 +1,17 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import InputComponent from "@/components/Input";
 import Link from "next/link";
 import { MdOutlineSubdirectoryArrowRight } from "react-icons/md";
-import { FaUserTie, FaUsers } from "react-icons/fa"; // Para os ícones de Worker e Client
+import { FaUserTie, FaUsers } from "react-icons/fa";
 import styles from './styles.module.css';
 import ButtonComponent from "../Button";
+import ImageCropper from "@/components/CropperImage";
+import handleUpload from "@/utils/uploadForFirebase";
+import { useRouter } from "next/navigation";
+import { FaSpinner } from "react-icons/fa";
 
 export default function SignUpBox() {
     const [nameValue, setNameValue] = useState("");
@@ -16,10 +20,14 @@ export default function SignUpBox() {
     const [passwordValue, setPasswordValue] = useState("");
     const [confirmPasswordValue, setConfirmPasswordValue] = useState("");
     const [showPasswordFields, setShowPasswordFields] = useState(false);
+    const [showProfileFields, setShowProfileFields] = useState(false);
     const [showAccountType, setShowAccountType] = useState(false);
     const [selectedOption, setSelectedOption] = useState<string | null>(null);
     const [errors, setErrors] = useState<string[]>([]);
-    const [isSubmitting, setIsSubmitting] = useState(false); // Para controlar o estado do envio
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [croppedImage, setCroppedImage] = useState<string | null>(null);
+
+    const router = useRouter();
 
     const handleButtonClick = () => {
         setErrors([]);
@@ -32,6 +40,8 @@ export default function SignUpBox() {
 
         if (!showPasswordFields) {
             setShowPasswordFields(true);
+        } else if (!showProfileFields) {
+            setShowProfileFields(true);
         } else if (!showAccountType) {
             setShowAccountType(true);
         }
@@ -46,9 +56,11 @@ export default function SignUpBox() {
         if (!emailValue.trim()) {
             validationErrors.push("E-mail é obrigatório.");
         }
-
         if (showPasswordFields && passwordValue !== confirmPasswordValue) {
             validationErrors.push("As senhas não coincidem.");
+        }
+        if (showProfileFields && !usernameValue.trim()) {
+            validationErrors.push("Nome de usuário é obrigatório.");
         }
 
         return validationErrors;
@@ -59,21 +71,22 @@ export default function SignUpBox() {
     };
 
     const handleSubmit = async () => {
-        if (isSubmitting) return; // Previne múltiplos envios
-
+        if (isSubmitting || !croppedImage) return;
+        
         setIsSubmitting(true);
-
+        
+        const urlImage = await handleUpload(croppedImage)
         const body = {
             username: usernameValue,
             password: passwordValue,
             type: selectedOption?.toUpperCase(),
             name: nameValue,
             email: emailValue,
-            profilePhoto: "N/A", // Placeholder para foto de perfil
+            profilePhoto: urlImage || "N/A",
         };
 
         try {
-            const response = await fetch('/api/user', {
+            const response = await fetch('/api/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -84,28 +97,26 @@ export default function SignUpBox() {
             const result = await response.json();
 
             if (response.ok) {
-                // Sucesso: Mostrar mensagem ou redirecionar
-                alert(result.message);
+                router.push('/')
             } else {
-                // Erro: Mostrar mensagem de erro
                 alert(result.message);
             }
         } catch (error) {
             console.error('Erro ao criar usuário:', error);
             alert('Erro ao criar usuário. Tente novamente.');
         } finally {
-            setIsSubmitting(false); // Libera para novos envios
+            setIsSubmitting(false);
+            
         }
     };
 
     return (
         <form className="form-signIn col-span-7 md:col-span-4 lg:col-span-3 border-l border-gray-700 bg-gray-900 text-gray-50 w-full h-full px-16 py-16 sm:px-32 md:px-14 shadow-xl overflow-hidden" onSubmit={(e) => {
-            e.preventDefault()
-            handleSubmit()
+            e.preventDefault();
+            handleSubmit();
         }}>
             <h1 className="text-4xl font-bold text-center mb-8">Criar Conta</h1>
             <div className="flex flex-col justify-center align-center gap-10 w-full h-full flex-grow">
-                {/* Exibe erros, caso existam */}
                 {errors.length > 0 && (
                     <div className="text-red-500 bg-red-900 p-4 rounded-md mb-6">
                         <ul>
@@ -118,8 +129,7 @@ export default function SignUpBox() {
 
                 <div className="text-zinc-200 flex flex-col gap-6">
                     <AnimatePresence>
-                        {/* Fase 1: Nome e E-mail */}
-                        {!showPasswordFields && !showAccountType && (
+                        {!showPasswordFields && !showProfileFields && !showAccountType && (
                             <>
                                 <motion.div
                                     key="name"
@@ -131,7 +141,7 @@ export default function SignUpBox() {
                                 >
                                     <InputComponent
                                         name="name"
-                                        text="Nome Completo"
+                                        text="Nome e sobrenome"
                                         typeInput="text"
                                         changeState={setNameValue}
                                         state={nameValue}
@@ -155,28 +165,10 @@ export default function SignUpBox() {
                                         state={emailValue}
                                     />
                                 </motion.div>
-                                <motion.div
-                                    key="username"
-                                    className="w-full h-14 relative"
-                                    initial={{ x: 0, opacity: 1 }}
-                                    animate={{ x: 0, opacity: 1 }}
-                                    exit={{ x: -100, opacity: 0 }}
-                                    transition={{ duration: 0.5 }}
-                                >
-                                    <InputComponent
-                                        name="username"
-                                        text="Username"
-                                        bgColor="bg-gray-900"
-                                        typeInput="text"
-                                        changeState={setUsernameValue}
-                                        state={usernameValue}
-                                    />
-                                </motion.div>
                             </>
                         )}
 
-                        {/* Fase 2: Senha e Confirmar Senha */}
-                        {showPasswordFields && !showAccountType && (
+                        {showPasswordFields && !showProfileFields && !showAccountType && (
                             <>
                                 <motion.div
                                     key="password"
@@ -214,7 +206,38 @@ export default function SignUpBox() {
                             </>
                         )}
 
-                        {/* Fase 3: Escolha entre Worker ou Client */}
+                        {showProfileFields && !showAccountType && (
+                            <>
+                                <motion.div
+                                    key="profileFields"
+                                    className="w-full flex flex-col items-center gap-6 pb-6"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    transition={{ duration: 0.5 }}
+                                >
+                                    <p className="text-center font-bold">Foto de Perfil</p>
+                                    <ImageCropper onImageCropped={setCroppedImage} />
+                                      </motion.div>
+                                <motion.div
+                                    key="username"
+                                    className="w-full h-14 relative"
+                                    initial={{ x: 100, opacity: 0 }}
+                                    animate={{ x: 0, opacity: 1 }}
+                                    exit={{ x: -100, opacity: 0 }}
+                                    transition={{ duration: 0.5 }}
+                                >
+                                    <InputComponent
+                                        name="username"
+                                        text="Nome de usuário"
+                                        typeInput="text"
+                                        changeState={setUsernameValue}
+                                        state={usernameValue}
+                                    />
+                                </motion.div>
+                            </>
+                        )}
+
                         {showAccountType && (
                             <motion.div
                                 key="accountType"
@@ -229,11 +252,10 @@ export default function SignUpBox() {
                                 </h2>
 
                                 <div className="flex justify-between w-full px-12 gap-8">
-                                    {/* Opção Worker */}
                                     <div
                                         className={`flex flex-col items-center text-gray-300 p-6 rounded-lg border transition-all cursor-pointer ${selectedOption === "worker"
-                                                ? "border-purple-500"
-                                                : "border-transparent hover:border-gray-600"
+                                            ? "border-purple-500"
+                                            : "border-transparent hover:border-gray-600"
                                             }`}
                                         onClick={() => handleOptionClick("worker")}
                                     >
@@ -244,11 +266,10 @@ export default function SignUpBox() {
                                         <p className="text-sm text-justify mt-2">Como trabalhador, você poderá oferecer seus serviços e ser encontrado por clientes em busca de profissionais qualificados.</p>
                                     </div>
 
-                                    {/* Opção Client */}
                                     <div
                                         className={`flex flex-col items-center text-gray-300 p-6 rounded-lg border transition-all cursor-pointer ${selectedOption === "client"
-                                                ? "border-blue-500"
-                                                : "border-transparent hover:border-gray-600"
+                                            ? "border-blue-500"
+                                            : "border-transparent hover:border-gray-600"
                                             }`}
                                         onClick={() => handleOptionClick("client")}
                                     >

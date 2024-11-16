@@ -1,52 +1,62 @@
+// middleware.ts
 import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
+import { verifyTokenAndGetUser } from "./utils/authHelper";
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const token = req.cookies.get("authToken");
+  const token = req.cookies.get("authToken")?.value;
 
-  // Permite que a página de login prossiga sem redirecionamento
-  if (pathname === "/login" || pathname === "/signup") {
-    if (token) {
-      const loginUrl = new URL("/", req.url);
-      return NextResponse.redirect(loginUrl);
-    }
-    return NextResponse.next();
+  if (["/login", "/signup"].includes(pathname)) {
+    return token ? NextResponse.redirect(new URL("/", req.url)) : NextResponse.next();
   }
 
+  // Tratamento de rotas da API
   if (pathname.startsWith("/api")) {
-    const token = req.headers.get("authorization");
+    const authToken = req.headers.get("authorization") || token;
 
-    // Se não houver token, redireciona ou retorna erro
-    if (!token) {
-      // Permite que login e criação de usuário prossigam sem token
-      if (pathname === "/api/login" || (pathname === "/api/user" && req.method === 'POST') || pathname === "/api" || pathname === "/api/logout") {
-        return NextResponse.next();
-      }
+    if (["/api/login", "/api/signup", "/api/logout"].includes(pathname)) {
+      return NextResponse.next();
+    }
 
+    if (!authToken) {
       return NextResponse.json({
-        "status": "error",
-        "code": 401,
-        "message": "Token de autorização não encontrado. Acesso negado.",
-        "data": null
+        status: "error",
+        code: 401,
+        message: "Token de autorização não encontrado. Acesso negado.",
+        data: null,
       }, { status: 401 });
     }
 
+    const authResponse = await verifyTokenAndGetUser(req);
+    if (!authResponse) {
+      const response = NextResponse.json({
+        status: "error",
+        code: 401,
+        message: "Token de autenticação inválido. Acesso negado.",
+        data: null,
+      }, { status: 401 });
+      
+      response.cookies.set("authToken", "", { expires: new Date(0), path: "/" });
+      return response;
+    }
+
     return NextResponse.next();
   }
 
-  
   if (!token) {
-    const loginUrl = new URL("/login", req.url);
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  const headers = new Headers(req.headers);
-  headers.set("x-current-path", req.nextUrl.pathname);
+  const authResponse = await verifyTokenAndGetUser(req);
+  if (!authResponse) {
+    const response = NextResponse.redirect(new URL("/login", req.url));
+    response.cookies.set("authToken", "", { expires: new Date(0), path: "/" });
+    return response;
+  }
 
-  return NextResponse.next({ headers });
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|favicon.ico).*)"], // Exclui API e arquivos estáticos do middleware
+  matcher: ["/((?!_next/static|favicon.ico).*)"],
 };

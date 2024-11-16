@@ -1,0 +1,8 @@
+nav input:focus {
+    outline: none;
+    box-shadow: 0 0 6px rgba(128, 90, 213, 0.8); /* Roxo suave */
+  }
+  
+  nav .dropdown ul li:hover {
+    transition: all 0.3s ease;
+  }

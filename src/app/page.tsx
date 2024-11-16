@@ -1,107 +1,117 @@
 'use client'
+import CreateMenuButton from "@/components/CreateMenuButton";
+// pages/home.tsx
+import Link from "next/link";
+import { FaUserCircle } from "react-icons/fa";
 
-import Image from "next/image";
-import { redirect } from "next/navigation";
+const Home = () => {
+  // Simulação de dados
+  const posts = [
+    { 
+      title: "Como começar no desenvolvimento web", 
+      author: "João", 
+      date: "10 de Outubro", 
+      content: "Dicas valiosas para iniciantes...", 
+      image: "/images/web-development.jpg" 
+    },
+    { 
+      title: "Trabalhando como freelancer em 2024", 
+      author: "Maria", 
+      date: "15 de Outubro", 
+      content: "Estratégias para conquistar clientes...", 
+      image: "/images/freelancing.jpg" 
+    },
+    { 
+      title: "Melhores ferramentas de design", 
+      author: "Lucas", 
+      date: "17 de Outubro", 
+      content: "Ferramentas indispensáveis...", 
+      image: "/images/design-tools.jpg" 
+    },
+  ];
 
-export default function Home() {
+  const projects = [
+    { title: "Desenvolvimento de Site para Restaurante", description: "Desenvolvimento de um site para um restaurante local.", budget: "R$ 2.500", skills: ["HTML", "CSS", "JavaScript"] },
+    { title: "App para Delivery de Comida", description: "App para facilitar pedidos e entregas.", budget: "R$ 5.000", skills: ["React", "Node.js"] },
+    { title: "Criação de Logo para Startup", description: "Design de logo e identidade visual.", budget: "R$ 1.000", skills: ["Design", "Adobe Suite"] },
+  ];
 
-  const handleClick = () => {
-    redirect('/sla')
-  }
+  const workers = [
+    { name: "Carlos", jobTitle: "Desenvolvedor Front-end", location: "São Paulo", rating: 4.8 },
+    { name: "Ana", jobTitle: "Designer Gráfico", location: "Rio de Janeiro", rating: 4.5 },
+    { name: "Fernanda", jobTitle: "Redatora", location: "Belo Horizonte", rating: 4.9 },
+  ];
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <button
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            onClick={handleClick}
->
-            Read our docs
-          </button>
+    <div className="flex flex-col gap-16 mt-16">
+      <CreateMenuButton />
+      {/* Seção de Posts */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold text-white">Postagens Recentes</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {posts.map((post, index) => (
+            <div key={index} className="bg-zinc-800 p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+              <img src={post.image} alt={post.title} className="w-full h-40 object-cover rounded-lg mb-3" />
+              <h3 className="text-lg font-semibold text-purple-500">{post.title}</h3>
+              <p className="text-sm text-gray-400">{post.content.substring(0, 100)}...</p>
+              <div className="mt-2 text-xs text-gray-500">
+                <span>{post.author}</span> • <span>{post.date}</span>
+              </div>
+              <Link href={`/posts/${index}`} className="text-purple-500 text-sm mt-2 block">Leia mais</Link>
+            </div>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+        <button className="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-lg mt-4">Ver Mais</button>
+      </section>
+
+      {/* Seção de Projetos */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold text-white">Sugestões de Projetos</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {projects.map((project, index) => (
+            <div key={index} className="bg-zinc-800 p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+              <h3 className="text-lg font-semibold text-purple-500">{project.title}</h3>
+              <p className="text-sm text-gray-400">{project.description}</p>
+              <div className="mt-2 text-xs text-gray-500">
+                <span className="font-bold">Orçamento:</span> {project.budget}
+              </div>
+              <div className="mt-2 text-xs text-gray-500">
+                <span className="font-bold">Habilidades:</span> {project.skills.join(", ")}
+              </div>
+              <Link href={`/projects/${index}`} className="text-purple-500 text-sm mt-2 block">Ver Projeto</Link>
+            </div>
+          ))}
+        </div>
+        <button className="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-lg mt-4">Ver Mais</button>
+      </section>
+
+      {/* Seção de Freelancers */}
+      <section className="space-y-4">
+        <h2 className="text-2xl font-bold text-white">Freelancers Sugeridos</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {workers.map((worker, index) => (
+            <div key={index} className="bg-zinc-800 p-4 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+              <div className="flex items-center space-x-3">
+                <FaUserCircle size={50} className="text-gray-300" />
+                <div>
+                  <h3 className="text-lg font-semibold text-purple-500">{worker.name}</h3>
+                  <p className="text-sm text-gray-400">{worker.jobTitle}</p>
+                </div>
+              </div>
+              <div className="mt-2 text-xs text-gray-500">
+                <span className="font-bold">Localização:</span> {worker.location}
+              </div>
+              <div className="mt-2 text-xs text-gray-500">
+                <span className="font-bold">Avaliação:</span> {worker.rating} ⭐
+              </div>
+              <Link href={`/workers/${index}`} className="text-purple-500 text-sm mt-2 block">Ver Perfil</Link>
+            </div>
+          ))}
+        </div>
+        <button className="bg-purple-500 hover:bg-purple-600 text-white py-2 px-4 rounded-lg mt-4">Ver Mais</button>
+      </section>
     </div>
   );
-}
+};
+
+export default Home;
