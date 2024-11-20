@@ -7,6 +7,7 @@ import Sidebar from "@/components/Sidebar";
 import { UserProvider } from "@/context/UserContext"; // Certifique-se de importar corretamente
 import Image from "next/image";
 import planetLoad from '@/assets/img/preload.svg'
+import CreateMenuButton from "../CreateMenuButton";
 
 // Componente de Loading
 const LoadingSpinner = () => (
@@ -24,6 +25,7 @@ const LayoutWithNav = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="grid grid-cols-12">
+      <CreateMenuButton />
       <Navbar onMenuToggle={toggleSidebar} />
       <Sidebar auxiliarClass="col-span-1" isMinimized={isSidebarMinimized} />
       <main className="main col-span-11 h-screen overflow-y-scroll">{children}</main>

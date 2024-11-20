@@ -1,5 +1,7 @@
 "use client";
 
+import { useUser } from "@/context/UserContext";
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { AiOutlinePhone, AiOutlineMail, AiOutlineInstagram, AiOutlineLinkedin } from "react-icons/ai";
 import { BsFillStarFill } from "react-icons/bs";
@@ -56,6 +58,10 @@ const WorkerProfilePage = () => {
     alert("Mensagem enviada para " + worker.name);
   };
 
+  const { user } = useUser()
+
+  if(!user) return
+
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white p-4 pb-40">
       {/* Cabeçalho com imagem de capa e avatar */}
@@ -66,21 +72,23 @@ const WorkerProfilePage = () => {
           className="w-full h-48 object-cover rounded-t-lg"
         />
         <div className="absolute top-36 left-6">
-          <img
-            src="https://via.placeholder.com/150"
+          <Image
+            src={user.profilePhoto}
             alt="Avatar"
-            className="w-32 h-32 rounded-full border-4 border-purple-600"
+            width={128}
+            height={128}
+            className="rounded-full border-4 border-purple-600"
           />
         </div>
       </div>
 
       {/* Informações do Perfil */}
       <div className="mt-32 px-6">
-        <h1 className="text-3xl font-semibold">{worker.name}</h1>
+        <h1 className="text-3xl font-semibold">{user.name}</h1>
         <h2 className="text-xl text-gray-400 mb-4">{worker.profession}</h2>
 
         {/* Descrição sobre o trabalhador */}
-        <div className="bg-gradient-to-r from-purple-700 via-purple-800 to-purple-900 p-6 rounded-lg mb-6">
+        <div className="bg-gradient-to-r from-gray-900 via-purple-600 to-purple-900 p-6 rounded-lg mb-6">
           <h3 className="text-lg font-semibold mb-2">Sobre Mim</h3>
           <p>{worker.bio}</p>
         </div>
@@ -93,7 +101,7 @@ const WorkerProfilePage = () => {
         </div>
 
         {/* Habilidades */}
-        <div className="bg-gradient-to-r from-purple-700 via-purple-800 to-purple-900 p-6 rounded-lg mb-6">
+        <div className="bg-gradient-to-r from-purple-700 via-purple-600 to-gray-900 p-6 rounded-lg mb-6">
           <h3 className="text-lg font-semibold mb-2">Habilidades</h3>
           <ul className="flex flex-wrap gap-3">
             {worker.skills.map((skill, index) => (
@@ -103,7 +111,7 @@ const WorkerProfilePage = () => {
         </div>
 
         {/* Informações de Contato */}
-        <div className="bg-gradient-to-r from-purple-700 via-purple-800 to-purple-900 p-6 rounded-lg mb-6">
+        <div className="bg-gradient-to-b from-purple-700 via-purple-800 to-gray-900 p-6 rounded-lg mb-6">
           <h3 className="text-lg font-semibold mb-2">Informações de Contato</h3>
           <div className="flex items-center mb-2">
             <AiOutlinePhone className="text-purple-400 text-lg" />

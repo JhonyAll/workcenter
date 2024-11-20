@@ -44,7 +44,7 @@ const Home = () => {
 
   return (
     <div className="flex flex-col gap-16 mt-16">
-      <CreateMenuButton />
+      
       {/* Seção de Posts */}
       <section className="space-y-4">
         <h2 className="text-2xl font-bold text-white">Postagens Recentes</h2>
