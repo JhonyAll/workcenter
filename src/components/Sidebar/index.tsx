@@ -15,7 +15,7 @@ const Sidebar = ({ auxiliarClass = "", isMinimized = false }: { auxiliarClass: s
   return (
     <aside
       className={` shadow-3xl text-white w-60 h-screen z-10 rounded-2xl py-6 ${auxiliarClass} ${
-        isMinimized ? "w-10" : "w-60"
+        isMinimized ? "w-8" : "w-60"
       } bg-gradient-to-b from-gray-900 via-purple-800 to-black mt-2 transition-all duration-300`}
     >
       <div className={`flex flex-col space-y-4 gap-2 ${isMinimized ? "justify-center items-center" : "pl-4"}`}>

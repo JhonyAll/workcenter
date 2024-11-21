@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User } from "@prisma/client";
+import { redirect } from "next/navigation";
 
 // Criação do contexto com o valor inicial como null
 type UserContextType = {
@@ -41,6 +42,11 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                     throw new Error("Erro ao buscar usuário");
                 }
                 const data = await response.json();
+                if (!data.user.isAuthenticated) {
+                    await fetch("/api/logout");
+                    redirect("/login");
+                    return
+                }
                 setUser(data.user.userData.data.user);
             } catch (err: unknown) {
                 // Verifica se o erro é uma instância de Error antes de acessar suas propriedades
