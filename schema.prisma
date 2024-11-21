@@ -10,147 +10,211 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
 }
 
-// Adicionando um modelo Post ao schema
-model Post {
-  id          String   @id @default(uuid())
-  title       String
-  content     String
-  authorId    String
-  author      User     @relation(fields: [authorId], references: [id])
-  createdAt   DateTime @default(now()) @map(name: "created_at")
-  updatedAt   DateTime @updatedAt @map(name: "updated_at")
-}
-
 model User {
-  id              String       @id @default(uuid())
-  username        String       @unique
-  password        String
-  type            UserType     @default(CLIENT)
-  name            String?
-  email           String?      @unique
-  profilePhoto    String
-  createdAt       DateTime     @default(now()) @map(name: "created_at")
-  updatedAt       DateTime     @updatedAt @map(name: "updated_at")
-  posts           Post[]       // Agora este campo está correto, referenciando o modelo Post
-  tokens          Token[]
-  reviewsGiven    Review[]     @relation("ReviewReviewer")
-  reviewsReceived Review[]     @relation("ReviewReviewee")
-  professions     Profession[] @relation("UserProfessions")
-  portfolio       Portfolio[]
-  jobApplications JobApplication[]
-  jobs            Job[]        // Adicionado campo de relação reversa para Job
-  paymentsMade    Payment[]    @relation("PaymentPayer")
-  paymentsReceived Payment[]  @relation("PaymentPayee")
+  id             String         @id @default(uuid())
+  username       String         @unique
+  password       String
+  type           UserType       @default(CLIENT)
+  name           String?
+  email          String?        @unique
+  profilePhoto   String
+  createdAt      DateTime       @default(now()) @map(name: "created_at")
+  updatedAt      DateTime       @updatedAt @map(name: "updated_at")
+  posts          Post[]
+  Token          Token[]
+  Comment        Comment[]
+  Application    Application[]
+  Project        Project[]
+  WorkerProfile  WorkerProfile?
+  chats          Chat[]         @relation("ChatParticipants")
+  Message        Message[]
+  Like           Like[]
+  ReviewAsClient Review[]       @relation("ClientReviews") // Avaliações como cliente
+  ReviewAsWorker Review[]       @relation("WorkerReviews") // Avaliações como trabalhador
+  Task           Task[]
 
   @@map(name: "users")
 }
 
-
-enum UserType {
-  CLIENT
-  WORKER
-}
-
-// Definição de Token
 model Token {
   id        Int      @id @default(autoincrement())
   token     String   @unique
   userId    String
   user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
-  @@unique([token, userId])
 
+  @@unique([token, userId])
   @@map(name: "tokens")
 }
 
-// Definição de Review
-model Review {
+enum UserType {
+  CLIENT
+  WORKER
+}
+
+model WorkerProfile {
+  id             String   @id @default(uuid())
+  user           User     @relation(fields: [userId], references: [id])
+  userId         String   @unique
+  profession     String // Profissão principal do Worker
+  skills         Skill[]  @relation("WorkerSkills") // Vários skills
+  contactInfo    String? // Informação de contato adicional (ex.: redes sociais)
+  rating         Float? // Avaliação média do Worker
+  portfolio      String[] // URLs de imagens/textos mostrando trabalhos anteriores
+  completedTasks Int // Número de tarefas concluídas
+
+  @@map(name: "worker_profiles")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  content   String // Conteúdo da mensagem
+  sender    User     @relation(fields: [senderId], references: [id])
+  senderId  String
+  chat      Chat     @relation(fields: [chatId], references: [id])
+  chatId    String
+  createdAt DateTime @default(now())
+
+  @@map(name: "messages")
+}
+
+model Chat {
+  id           String    @id @default(uuid())
+  participants User[]    @relation("ChatParticipants")
+  messages     Message[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map(name: "chats")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String // Texto do comentário
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    String
+  Project   Project? @relation(fields: [projectId], references: [id])
+  projectId String?
+
+  @@map(name: "comments")
+}
+
+model Post {
+  id          String    @id @default(uuid())
+  title       String
+  description String
+  images      String[] // Array de URLs para imagens
+  files       String[] // Array de URLs para arquivos
+  links       String[] // Array de URLs para links externos
+  embedCode   String? // Código incorporado para tutoriais, opcional
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  author      User      @relation(fields: [authorId], references: [id])
+  authorId    String
+  hashtags    Hashtag[] @relation("PostHashtags") // Relação com hashtags
+  comments    Comment[] // Comentários relacionados ao post
+  Like        Like[]
+
+  @@map(name: "posts")
+}
+
+model Application {
   id          String   @id @default(uuid())
-  rating      Int      // rating between 1 and 5
-  comment     String?
-  jobId       String
-  job         Job      @relation(fields: [jobId], references: [id])
-  reviewerId  String
-  reviewer    User     @relation("ReviewReviewer", fields: [reviewerId], references: [id]) // client who wrote the review
-  revieweeId  String
-  reviewee    User     @relation("ReviewReviewee", fields: [revieweeId], references: [id]) // worker who was reviewed
+  worker      User     @relation(fields: [workerId], references: [id])
+  workerId    String
+  project     Project  @relation(fields: [projectId], references: [id])
+  projectId   String
+  coverLetter String? // Carta de apresentação opcional
+  proposedFee Float // Valor proposto pelo Worker
   createdAt   DateTime @default(now())
+
+  @@map(name: "applications")
+}
+
+model Project {
+  id           String        @id @default(uuid())
+  title        String
+  description  String
+  budget       Float // Orçamento do projeto
+  deadline     DateTime? // Prazo desejado, opcional
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  author       User          @relation(fields: [authorId], references: [id])
+  authorId     String
+  hashtags     Hashtag[]     @relation("ProjectHashtags") // Relação com hashtags
+  applications Application[] // Candidaturas dos Workers
+  comments     Comment[] // Comentários no projeto
+  Like         Like[]
+  Task         Task[]
+
+  @@map(name: "projects")
+}
+
+model Hashtag {
+  id       String    @id @default(uuid())
+  name     String    @unique // Nome da hashtag
+  posts    Post[]    @relation("PostHashtags")
+  projects Project[] @relation("ProjectHashtags")
+
+  @@map(name: "hashtags")
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  post      Post?    @relation(fields: [postId], references: [id])
+  postId    String?
+  project   Project? @relation(fields: [projectId], references: [id])
+  projectId String?
+  createdAt DateTime @default(now())
+
+  @@map(name: "likes")
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  client    User     @relation("ClientReviews", fields: [clientId], references: [id])
+  clientId  String
+  worker    User     @relation("WorkerReviews", fields: [workerId], references: [id])
+  workerId  String
+  rating    Int // Avaliação de 1 a 5
+  feedback  String // Texto do feedback
+  createdAt DateTime @default(now())
 
   @@map(name: "reviews")
 }
 
-// Definição de Job
-model Job {
-  id          String         @id @default(uuid())
-  title       String
-  description String
-  userId      String
-  user        User           @relation(fields: [userId], references: [id])
-  jobApplications JobApplication[]
-  payments    Payment[]
-  reviews     Review[]
+model Skill {
+  id       String          @id @default(uuid())
+  name     String          @unique
+  category String // Categoria da habilidade (ex.: Design, Desenvolvimento)
+  workers  WorkerProfile[] @relation("WorkerSkills")
 
-  @@map(name: "jobs")
+  @@map(name: "skills")
 }
 
-// Definição de JobApplication
-model JobApplication {
-  id       String   @id @default(uuid())
-  jobId    String
-  job      Job      @relation(fields: [jobId], references: [id])
-  userId   String
-  user     User     @relation(fields: [userId], references: [id])
-  status   JobStatus
+model Task {
+  id           String     @id @default(uuid())
+  project      Project    @relation(fields: [projectId], references: [id])
+  projectId    String
+  title        String
+  description  String
+  status       TaskStatus // Status da tarefa (Ex.: "Em andamento", "Concluída")
+  assignedTo   User       @relation(fields: [assignedToId], references: [id])
+  assignedToId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
-  @@map(name: "job_applications")
+  @@map(name: "tasks")
 }
 
-// Definição de Payment
-model Payment {
-  id        String    @id @default(uuid())
-  amount    Float     // the amount paid
-  status    PaymentStatus @default(PENDING)
-  jobId     String
-  job       Job       @relation(fields: [jobId], references: [id])
-  payerId   String
-  payer     User      @relation("PaymentPayer", fields: [payerId], references: [id]) // client
-  payeeId   String
-  payee     User      @relation("PaymentPayee", fields: [payeeId], references: [id]) // worker
-  createdAt DateTime  @default(now())
-
-  @@map(name: "payments")
-}
-
-enum JobStatus {
+enum TaskStatus {
   PENDING
   IN_PROGRESS
   COMPLETED
 }
-
-enum PaymentStatus {
-  PENDING
-  COMPLETED
-  FAILED
-}
-
-// Definição de Profession
-model Profession {
-  id        String    @id @default(uuid())
-  name      String    @unique
-  workers   User[]    @relation("UserProfessions")
-
-  @@map(name: "professions")
-}
-
-// Definição de Portfolio
-model Portfolio {
-  id        String   @id @default(uuid())
-  title     String
-  description String
-  imageUrl  String
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-
-  @@map(name: "portfolios")
-}
-
