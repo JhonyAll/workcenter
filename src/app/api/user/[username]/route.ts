@@ -5,9 +5,9 @@ import { NextResponse, NextRequest } from "next/server";
 // Função para a requisição GET, buscando um usuário específico pelo username
 export async function GET(
   req: NextRequest,
-  { params }: { params: { username: string } }
+  { params }: { params: Promise<{ username: string }> }
 ) {
-  const username = params.username; // Obtém o username diretamente dos parâmetros
+  const username = (await params).username; // Obtém o username diretamente dos parâmetros
 
   try {
     // Tenta buscar o usuário no banco com base no 'username'
