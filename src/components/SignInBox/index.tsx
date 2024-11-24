@@ -7,12 +7,17 @@ import Link from "next/link";
 import { PiEye, PiEyeSlash } from "react-icons/pi";
 import Image from "next/image";
 import planetLogo from '@/assets/img/planet-logo.svg'
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/context/UserContext";
 
 export default function SignInBox() {
     const [reveledPassword, setReveledPassword] = useState(false);
     const [emailValue, setEmailValue] = useState("");
     const [passwordValue, setPasswordValue] = useState("");
+
+    const router = useRouter()
+
+    const { refreshUser } = useUser()
 
     const handleLogin = async (usernameOrEmail: string, password: string) => {
         try {
@@ -35,7 +40,8 @@ export default function SignInBox() {
             return console.error('Erro ao fazer login', error);
         }
 
-        return redirect('/')
+        router.push('/')
+        await refreshUser()
     };
 
     const handleSubmit = (e: React.FormEvent) => {

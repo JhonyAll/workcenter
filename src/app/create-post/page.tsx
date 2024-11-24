@@ -1,7 +1,10 @@
 "use client";
 
+import { useUser } from "@/context/UserContext";
+import handleUpload from "@/utils/uploadForFirebase";
 import { useState } from "react";
 import { IoIosClose } from "react-icons/io";
+import { useRouter } from "next/navigation";
 
 const CreatePostPage = () => {
   const [title, setTitle] = useState("");
@@ -13,6 +16,58 @@ const CreatePostPage = () => {
   const [links, setLinks] = useState<string[]>([]);
   const [newLink, setNewLink] = useState("");
   const [preview, setPreview] = useState(false)
+
+  const { user } = useUser()
+  const router = useRouter()
+
+  const handleMultipleUploads = async (files: File[]) => {
+    try {
+      // Mapeia os arquivos para chamadas da função handleUpload
+      const uploadPromises = files.map((file) => handleUpload(file));
+
+      // Aguarda o upload de todos os arquivos
+      const downloadURLs = await Promise.all(uploadPromises);
+
+      return downloadURLs; // Retorna as URLs de download
+    } catch (error) {
+      console.error("Erro durante o upload de arquivos:", error);
+      throw error;
+    }
+  };
+
+  const handlePublishPost = async () => {
+
+    const body = {
+      "title": title,
+      "description": description,
+      "gallery": await handleMultipleUploads(media),
+      "links": links,
+      "hashtags": categories,
+      "codeSnippet": codeSnippet,
+      "userId": user?.id
+    };
+
+    try {
+      const response = await fetch('/api/posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        router.push('/')
+      } else {
+        alert(result.message);
+      }
+    } catch (error) {
+      console.error('Erro ao criar usuário:', error);
+      alert('Erro ao criar usuário. Tente novamente.');
+    }
+  }
 
   const handleViewPreview = () => {
     setPreview(!preview)
@@ -187,7 +242,7 @@ const CreatePostPage = () => {
               Visualizar Preview
             </button>
             <button
-              onClick={handleAddCategory}
+              onClick={handlePublishPost}
               className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-500"
             >
               Publicar Post

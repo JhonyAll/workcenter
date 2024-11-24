@@ -57,7 +57,7 @@ const Navbar = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
             className="flex items-center space-x-2 cursor-pointer"
             onClick={toggleDropdown}
           >
-            {user ? (
+            {user && !(user.profilePhoto === 'N/A') ? (
               <Image
                 src={user.profilePhoto}
                 className="rounded-full border-2 border-purple-500"

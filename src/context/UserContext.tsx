@@ -1,73 +1,71 @@
-// src/context/UserContext.tsx
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User } from "@prisma/client";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-// Criação do contexto com o valor inicial como null
 type UserContextType = {
-    user: User | null;
-    isLoading: boolean;
-    error: string | null;
+  user: User | null;
+  isLoading: boolean;
+  error: string | null;
+  refreshUser: () => Promise<void>;
 };
 
-export const UserContext = createContext<UserContextType | null>(null);
+const UserContext = createContext<UserContextType | null>(null);
 
-
-// Hook para acessar o contexto de usuário
 export const useUser = () => {
-    const context = useContext(UserContext);
-
-    if (!context) {
-        throw new Error("useUser deve ser usado dentro de um UserProvider");
-    }
-
-    return context;
+  const context = useContext(UserContext);
+  if (!context) {
+    throw new Error("useUser deve ser usado dentro de um UserProvider");
+  }
+  return context;
 };
 
-
-// Componente Provider para envolver seu layout ou a árvore de componentes
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter()
 
-    useEffect(() => {
-        const fetchUserData = async () => {
-            try {
-                const response = await fetch("/api/user/profile", {
-                    credentials: "include",
-                });
-                if (!response.ok) {
-                    throw new Error("Erro ao buscar usuário");
-                }
-                const data = await response.json();
-                if (!data.user.isAuthenticated) {
-                    await fetch("/api/logout");
-                    redirect("/login");
-                    return
-                }
-                setUser(data.user.userData.data.user);
-            } catch (err: unknown) {
-                // Verifica se o erro é uma instância de Error antes de acessar suas propriedades
-                if (err instanceof Error) {
-                    setError(err.message);
-                } else {
-                    setError("Erro desconhecido ocorreu.");
-                }
-                setUser(null);
-            } finally {
-                setIsLoading(false);
-            }
-        };
+  const fetchUserData = async () => {
+    setIsLoading(true);
+    setError(null);
 
-        fetchUserData();
-    }, []);
+    try {
+      const response = await fetch("/api/session", {
+        
+        credentials: "include",
+      });
 
-    return (
-        <UserContext.Provider value={{ user, isLoading, error }}>
-            {children}
-        </UserContext.Provider>
-    );
+      if (!response.ok) {
+        throw new Error("Erro ao buscar dados da sessão.");
+      }
+
+      const data = await response.json();
+
+      if (!data.isAuthenticated) {
+        await fetch("/api/logout")
+        setUser(null);
+        return router.push("/login")
+      }
+      setUser(data.user);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro desconhecido.");
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const refreshUser = async () => {
+    await fetchUserData();
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
+  return (
+    <UserContext.Provider value={{ user, isLoading, error, refreshUser }}>
+      {children}
+    </UserContext.Provider>
+  );
 };
-

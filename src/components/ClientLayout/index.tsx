@@ -24,11 +24,11 @@ const LayoutWithNav = ({ children }: { children: React.ReactNode }) => {
   const [isSidebarMinimized, setIsSidebarMinimized] = useState(true);
 
   return (
-    <div className="grid grid-cols-12">
+    <div className="grid grid-cols-12 max-h-screen overflow-hidden">
       <CreateMenuButton />
       <Navbar onMenuToggle={toggleSidebar} />
       <Sidebar auxiliarClass="col-span-1" isMinimized={isSidebarMinimized} />
-      <main className="main col-span-11 h-screen overflow-y-scroll">{children}</main>
+      <main className="main col-span-11 h-screen overflow-y-scroll pb-40 pr-10">{children}</main>
     </div>
   );
 };
@@ -36,23 +36,27 @@ const LayoutWithNav = ({ children }: { children: React.ReactNode }) => {
 const ClientLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const [showNavbarSidebar, setShowNavbarSidebar] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);  // Estado para controle de carregamento
+  const [isLoading, setIsLoading] = useState(false);  // Estado para controle de carregamento
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch("/api/user/profile", { credentials: "include" });
-        const data = await response.json();
-        setShowNavbarSidebar(!["/login", "/signup"].includes(pathname)); // Exibe ou esconde a navbar e sidebar conforme a lógica
-      } catch (error) {
-        console.error("Erro ao buscar usuário:", error);
-      } finally {
-        setIsLoading(false);  // Finaliza o carregamento quando a requisição terminar
-      }
-    };
-
-    fetchUserData();
+    // const fetchUserData = async () => {
+    //   try {
+    //     const response = await fetch("/api/session", { credentials: "include" });
+    //     if (!response.ok) {
+    //       throw new Error(`Erro na API: ${response.status}`);
+    //     }
+    //     const data = await response.json();
+    //   } catch (error) {
+    //     console.error("Erro ao buscar sessão do usuário:", error);
+    //   } finally {
+    //     setIsLoading(false);
+    //   }
+    // };
+    setShowNavbarSidebar(!["/login", "/signup"].includes(pathname)); // Lógica para exibir a Navbar/Sidebar
+  
+    // fetchUserData();
   }, [pathname]);
+  
 
   if (isLoading) {
     return <LoadingSpinner />;  // Exibe o spinner de loading enquanto o carregamento estiver ativo

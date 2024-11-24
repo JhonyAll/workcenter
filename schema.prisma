@@ -107,8 +107,7 @@ model Post {
   id          String    @id @default(uuid())
   title       String
   description String
-  images      String[] // Array de URLs para imagens
-  files       String[] // Array de URLs para arquivos
+  gallery       String[] // Array de URLs para arquivos
   links       String[] // Array de URLs para links externos
   embedCode   String? // Código incorporado para tutoriais, opcional
   createdAt   DateTime  @default(now())
@@ -139,7 +138,7 @@ model Project {
   id           String        @id @default(uuid())
   title        String
   description  String
-  budget       Float // Orçamento do projeto
+  budget       String
   deadline     DateTime? // Prazo desejado, opcional
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
@@ -192,7 +191,7 @@ model Review {
 model Skill {
   id       String          @id @default(uuid())
   name     String          @unique
-  category String // Categoria da habilidade (ex.: Design, Desenvolvimento)
+  category String? // Categoria da habilidade (ex.: Design, Desenvolvimento)
   workers  WorkerProfile[] @relation("WorkerSkills")
 
   @@map(name: "skills")

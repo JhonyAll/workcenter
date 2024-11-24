@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import InputComponent from "@/components/Input";
 import Link from "next/link";
@@ -12,6 +12,7 @@ import ImageCropper from "@/components/CropperImage";
 import handleUpload from "@/utils/uploadForFirebase";
 import { useRouter } from "next/navigation";
 import { FaSpinner } from "react-icons/fa";
+import { useUser } from "@/context/UserContext";
 
 export default function SignUpBox() {
     const [nameValue, setNameValue] = useState("");
@@ -21,15 +22,45 @@ export default function SignUpBox() {
     const [confirmPasswordValue, setConfirmPasswordValue] = useState("");
     const [showPasswordFields, setShowPasswordFields] = useState(false);
     const [showProfileFields, setShowProfileFields] = useState(false);
+    const [showWorkerFields, setShowWorkerFields] = useState(false);
     const [showAccountType, setShowAccountType] = useState(false);
-    const [selectedOption, setSelectedOption] = useState<string | null>(null);
+    const [selectedOption, setSelectedOption] = useState<string | null>('client');
     const [errors, setErrors] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [croppedImage, setCroppedImage] = useState<string | null>(null);
+    const [submitingButton, setSubmittingButton] = useState(false)
+    const [profession, setProfession] = useState("");
+    const [newSkills, setNewSkills] = useState<string>('')
+    const [skills, setSkills] = useState<string[]>([])
+
+    const { refreshUser } = useUser()
 
     const router = useRouter();
 
-    const handleButtonClick = () => {
+    const handleAddSkill = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault()
+        if (newSkills.trim() && !skills.includes(newSkills)) {
+            setSkills([...skills, newSkills]);
+            setNewSkills("");
+        }
+        console.log(skills)
+    };
+
+    const handleRemoveSkill = (skill: string) => {
+        setSkills(skills.filter((cat) => cat !== skill));
+    };
+
+    useEffect(() => {
+        if (selectedOption === 'client' || showWorkerFields) {
+            setSubmittingButton(true)
+        } else {
+            setSubmittingButton(false)
+        }
+    }, [selectedOption])
+
+    const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault()
+
         setErrors([]);
         const validationErrors = handleValidation();
 
@@ -44,6 +75,9 @@ export default function SignUpBox() {
             setShowProfileFields(true);
         } else if (!showAccountType) {
             setShowAccountType(true);
+        } else if (!showWorkerFields) {
+            setShowWorkerFields(true)
+            setSubmittingButton(true)
         }
     };
 
@@ -71,11 +105,14 @@ export default function SignUpBox() {
     };
 
     const handleSubmit = async () => {
-        if (isSubmitting || !croppedImage) return;
-        
+        if (isSubmitting) return;
+        let urlImage = "N/A"
+        if (croppedImage) urlImage = await handleUpload(croppedImage)
+
         setIsSubmitting(true);
-        
-        const urlImage = await handleUpload(croppedImage)
+
+        const skillsArray = skills.map(skill => ({ name: skill }));
+
         const body = {
             username: usernameValue,
             password: passwordValue,
@@ -83,6 +120,8 @@ export default function SignUpBox() {
             name: nameValue,
             email: emailValue,
             profilePhoto: urlImage || "N/A",
+            profession: profession,
+            skills: skillsArray
         };
 
         try {
@@ -98,6 +137,7 @@ export default function SignUpBox() {
 
             if (response.ok) {
                 router.push('/')
+                await refreshUser()
             } else {
                 alert(result.message);
             }
@@ -106,13 +146,14 @@ export default function SignUpBox() {
             alert('Erro ao criar usuário. Tente novamente.');
         } finally {
             setIsSubmitting(false);
-            
+
         }
     };
 
     return (
         <form className="form-signIn col-span-7 md:col-span-4 lg:col-span-3 border-l border-gray-700 bg-gray-900 text-gray-50 w-full h-full px-16 py-16 sm:px-32 md:px-14 shadow-xl overflow-hidden" onSubmit={(e) => {
             e.preventDefault();
+            console.log("BBBBBBBBBBBB")
             handleSubmit();
         }}>
             <h1 className="text-4xl font-bold text-center mb-8">Criar Conta</h1>
@@ -218,7 +259,7 @@ export default function SignUpBox() {
                                 >
                                     <p className="text-center font-bold">Foto de Perfil</p>
                                     <ImageCropper onImageCropped={setCroppedImage} />
-                                      </motion.div>
+                                </motion.div>
                                 <motion.div
                                     key="username"
                                     className="w-full h-14 relative"
@@ -238,7 +279,7 @@ export default function SignUpBox() {
                             </>
                         )}
 
-                        {showAccountType && (
+                        {showAccountType && !showWorkerFields && (
                             <motion.div
                                 key="accountType"
                                 className="w-full flex flex-col items-center mt-16 gap-6 pb-6"
@@ -281,6 +322,45 @@ export default function SignUpBox() {
                                     </div>
                                 </div>
                             </motion.div>
+
+                        )
+                        }
+                        {showWorkerFields && (
+                            <>
+                                <motion.div key="profession" className="w-full h-14 relative">
+                                    <InputComponent name="profession" text="Profissão" typeInput="text" changeState={setProfession} state={profession} />
+                                </motion.div>
+
+                                <div>
+                                    <h3 className="text-lg font-semibold">Habilidades</h3>
+                                    <div className="flex items-center mt-2 space-x-2">
+                                        <input
+                                            type="text"
+                                            placeholder="Adicionar habilidade"
+                                            value={newSkills}
+                                            onChange={(e) => setNewSkills(e.target.value)}
+                                            className="flex-1 bg-gray-800 text-white px-4 py-2 rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-purple-400"
+                                        />
+                                        <button
+                                            onClick={handleAddSkill}
+                                            className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-500"
+                                        >
+                                            Adicionar
+                                        </button>
+                                    </div>
+                                    <div className="flex flex-wrap mt-4 gap-2">
+                                        {skills.map((skill, idx) => (
+                                            <span
+                                                key={idx}
+                                                className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm cursor-pointer hover:bg-purple-500"
+                                                onClick={() => handleRemoveSkill(skill)}
+                                            >
+                                                {skill}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </>
                         )}
                     </AnimatePresence>
                 </div>
@@ -288,18 +368,14 @@ export default function SignUpBox() {
                 <div className="flex flex-col gap-20 mt-6">
                     <div className="w-full flex justify-center items-center">
                         {
-                            showAccountType ? <ButtonComponent
-                                text="Criar Conta"
-                                bgColor="bg-purple-500"
-                                textColor=""
-                                hoverBgColor="bg-purple-600"
-                                buttonSubmit={true}
-                            /> : <button
+                            (showAccountType && submitingButton) ? <button
+                                type="submit"
+                                className={`bg-purple-500 font-bold select-none h-14 rounded-xl hover:bg-transparent border-solid border border-transparent hover:border-slate-700 transition-all p-6 flex justify-center items-center`}
+                            >Criar Conta</button> : <button
                                 type="button"
                                 onClick={handleButtonClick}
                                 className={`bg-purple-500 font-bold select-none h-14 rounded-xl hover:bg-transparent border-solid border border-transparent hover:border-slate-700 transition-all p-6 flex justify-center items-center`}
                                 disabled={isSubmitting}
-
                             >
                                 <MdOutlineSubdirectoryArrowRight size={26} />
                             </button>
