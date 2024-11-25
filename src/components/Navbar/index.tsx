@@ -44,7 +44,7 @@ const Navbar = ({ onMenuToggle }: { onMenuToggle: () => void }) => {
             type="text"
             placeholder="Pesquisar..."
             className={`${
-              isSearchFocused ? "w-4/5 lg:w-3/5" : "w-2/5 lg:w-1/5"
+              isSearchFocused ? "w-4/5 lg:w-3/5" : "w-2/5 lg:w-2/5"
             } bg-gray-800 text-white rounded-lg px-4 py-2 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-[0.5px] focus:border-purple-400 transition-all duration-300  border border-gray-50`}
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setIsSearchFocused(false)}

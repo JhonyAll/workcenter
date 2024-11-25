@@ -168,7 +168,7 @@ const Home = () => {
               <h3 className="text-lg font-semibold text-purple-500">{project.title}</h3>
               <p className="text-sm text-gray-400">{project.description}</p>
               <div className="mt-2 text-xs text-gray-500">
-                <span className="font-bold">Orçamento:</span> {project.budget}
+                <span className="font-bold">Orçamento:</span> {project.budget === 'A negociar' ? project.budget : "R$ " + project.budget}
               </div>
               <div className="mt-2 text-xs text-gray-500">
                 <span className="font-bold">Categorias:</span> {project.hashtags.map((h, index) => <Link key={index} className="bg-purple-700 mr-2 py-1 px-2 text-white rounded-3xl" href={`/categories/${h.id}`}>#{h.name}</Link>)}
