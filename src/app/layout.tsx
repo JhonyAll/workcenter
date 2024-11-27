@@ -8,7 +8,6 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter'
 import ThemeRegistry from '@/components/ThemeRegistry';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import theme from '../theme';
-import Layout from "@/components/Layout";
 
 
 const roboto = Roboto({
