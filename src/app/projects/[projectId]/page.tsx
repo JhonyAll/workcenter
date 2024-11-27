@@ -34,7 +34,7 @@ const ProjectPage = ({ params }: { params: Promise<{ projectId: string }> }) => 
       setProject(responseJson.data.project);
     };
     fetchProject();
-  }, []);
+  }, [params]);
 
   const handleApply = () => {
     // Simulação de envio de aplicação

@@ -1,7 +1,7 @@
 "use client";
 
 import { useUser } from "@/context/UserContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Avatar,
   Box,
@@ -25,7 +25,7 @@ const WorkerProfilePage = () => {
   const [loading, setLoading] = useState(true);
 
   // Simula carregamento para Skeleton
-  useState(() => {
+  useEffect((): void | (() => void) => {
     const timer = setTimeout(() => setLoading(false), 1500); // Simula 1.5s de carregamento
     return () => clearTimeout(timer);
   }, []);
@@ -61,7 +61,6 @@ const WorkerProfilePage = () => {
       <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
         <Avatar
           src={user.profilePhoto || "https://via.placeholder.com/120"}
-          alt={user.name}
           sx={{ width: 120, height: 120, mb: 2 }}
         />
         <Typography variant="h5" fontWeight="bold">
@@ -105,7 +104,7 @@ const WorkerProfilePage = () => {
             Sobre mim
           </Typography>
           <Typography color="textSecondary">
-            {user.bio ||
+            {user.about ||
               "Este usuário ainda não acrescentou uma descrição sobre ele."}
           </Typography>
         </CardContent>
@@ -123,14 +122,14 @@ const WorkerProfilePage = () => {
       )}
 
       {/* Habilidades */}
-      {user.WorkerProfile?.skills?.length > 0 && (
+      { user.WorkerProfile?.skills && user.WorkerProfile?.skills?.length > 0 && (
         <Card sx={{ mb: 3 }}>
           <CardContent>
             <Typography variant="h6" fontWeight="bold" gutterBottom>
               Habilidades
             </Typography>
             <Box display="flex" flexWrap="wrap" gap={1}>
-              {user.WorkerProfile.skills.map((skill, index) => (
+              {user.WorkerProfile?.skills.map((skill, index) => (
                 <Chip key={index} label={skill.name} color="primary" />
               ))}
             </Box>
@@ -144,15 +143,15 @@ const WorkerProfilePage = () => {
           <Typography variant="h6" fontWeight="bold" gutterBottom>
             Contatos
           </Typography>
-          <Box display="flex" alignItems="center" gap={1} mb={1}>
+          {/* <Box display="flex" alignItems="center" gap={1} mb={1}>
             <AiOutlinePhone />
             <Typography color="textSecondary">{user.phone || "Não disponível"}</Typography>
-          </Box>
+          </Box> */}
           <Box display="flex" alignItems="center" gap={1} mb={1}>
             <AiOutlineMail />
             <Typography color="textSecondary">{user.email || "Não disponível"}</Typography>
           </Box>
-          <Box display="flex" alignItems="center" gap={1} mb={1}>
+          {/* <Box display="flex" alignItems="center" gap={1} mb={1}>
             <AiOutlineInstagram />
             <a href={user.WorkerProfile?.socialLinks?.instagram || "#"} target="_blank" rel="noopener noreferrer">
               Instagram
@@ -163,12 +162,12 @@ const WorkerProfilePage = () => {
             <a href={user.WorkerProfile?.socialLinks?.linkedin || "#"} target="_blank" rel="noopener noreferrer">
               LinkedIn
             </a>
-          </Box>
+          </Box> */}
         </CardContent>
       </Card>
 
       {/* Portfólio */}
-      {user.WorkerProfile?.portfolio?.length > 0 && (
+      {/* {user.WorkerProfile?.portfolio && user.WorkerProfile?.portfolio?.length > 0 && (
         <Box>
           <Typography variant="h6" fontWeight="bold" gutterBottom>
             Portfólio
@@ -199,7 +198,7 @@ const WorkerProfilePage = () => {
             ))}
           </Grid>
         </Box>
-      )}
+      )} */}
     </Container>
   );
 };

@@ -31,6 +31,7 @@ type UserWithWorkProfile = Prisma.UserGetPayload<{
         type: true;
         createdAt: true;
         updatedAt: true;
+        about: true;
         WorkerProfile: {
             include: {
                 skills: true;
@@ -48,7 +49,7 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
             const user = await fetch(`/api/user/${username}`).then(response => response.json()).then(responseJson => setUser(responseJson.data.user));
         };
         fetchUser();
-    }, []);
+    }, [params]);
 
     // Função de contato (para envio de mensagem ou interação)
     const handleContact = () => {
@@ -64,7 +65,6 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
             <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
                 <Avatar
                     src={user.profilePhoto || "https://via.placeholder.com/120"}
-                    alt={user.name}
                     sx={{ width: 120, height: 120, mb: 2 }}
                 />
                 <Typography variant="h5" fontWeight="bold">
@@ -106,7 +106,7 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
                         Sobre mim
                     </Typography>
                     <Typography color="textSecondary">
-                        {user.bio ||
+                        {user.about ||
                             "Este usuário ainda não acrescentou uma descrição sobre ele."}
                     </Typography>
                 </CardContent>
@@ -124,7 +124,7 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
             )}
 
             {/* Habilidades */}
-            {user.WorkerProfile?.skills?.length > 0 && (
+            {user.WorkerProfile?.skills && user.WorkerProfile?.skills?.length > 0 && (
                 <Card sx={{ mb: 3 }}>
                     <CardContent>
                         <Typography variant="h6" fontWeight="bold" gutterBottom>
@@ -145,15 +145,15 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
                     <Typography variant="h6" fontWeight="bold" gutterBottom>
                         Contatos
                     </Typography>
-                    <Box display="flex" alignItems="center" gap={1} mb={1}>
+                    {/* <Box display="flex" alignItems="center" gap={1} mb={1}>
                         <AiOutlinePhone />
                         <Typography color="textSecondary">{user.phone || "Não disponível"}</Typography>
-                    </Box>
+                    </Box> */}
                     <Box display="flex" alignItems="center" gap={1} mb={1}>
                         <AiOutlineMail />
                         <Typography color="textSecondary">{user.email || "Não disponível"}</Typography>
                     </Box>
-                    <Box display="flex" alignItems="center" gap={1} mb={1}>
+                    {/* <Box display="flex" alignItems="center" gap={1} mb={1}>
                         <AiOutlineInstagram />
                         <a href={user.WorkerProfile?.socialLinks?.instagram || "#"} target="_blank" rel="noopener noreferrer">
                             Instagram
@@ -164,12 +164,12 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
                         <a href={user.WorkerProfile?.socialLinks?.linkedin || "#"} target="_blank" rel="noopener noreferrer">
                             LinkedIn
                         </a>
-                    </Box>
+                    </Box> */}
                 </CardContent>
             </Card>
 
             {/* Portfólio */}
-            {user.WorkerProfile?.portfolio?.length > 0 && (
+            {/* {user.WorkerProfile?.portfolio && user.WorkerProfile?.portfolio?.length > 0 && (
                 <Box>
                     <Typography variant="h6" fontWeight="bold" gutterBottom>
                         Portfólio
@@ -200,7 +200,7 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
                         ))}
                     </Grid>
                 </Box>
-            )}
+            )} */}
         </Container>
     );
 };

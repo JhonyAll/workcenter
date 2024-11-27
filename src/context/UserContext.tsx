@@ -14,6 +14,7 @@ type UserWithWorkProfile = Prisma.UserGetPayload<{
     type: true,
     createdAt: true,
     updatedAt: true,
+    about: true,
     WorkerProfile: {
       include: {
         skills: true

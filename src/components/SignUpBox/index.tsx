@@ -26,9 +26,30 @@ const steps = [
     "Informações Adicionais",
 ];
 
+type errorsType = {
+    name: string;
+    email: string;
+    username: string;
+    password: string;
+    confirmPassword: string;
+}
+
+type FormData = {
+    name: string;
+    email: string;
+    password: string;
+    confirmPassword: string;
+    username: string;
+    profilePhoto: string;
+    accountType: string;
+    profession: string;
+    about: string;
+    skills: string[];  // Tipando a lista de habilidades
+};
+
 export default function SignUpBox() {
     const [activeStep, setActiveStep] = useState(0);
-    const [formData, setFormData] = useState({
+    const [formData, setFormData] = useState<FormData>({
         name: "",
         email: "",
         password: "",
@@ -41,7 +62,13 @@ export default function SignUpBox() {
         skills: []
     });
     const [currentSkill, setCurrentSkill] = useState("")
-    const [errors, setErrors] = useState({});
+    const [errors, setErrors] = useState<errorsType>({
+        name: '',
+        email: '',
+        username: '',
+        password: '',
+        confirmPassword: ''
+    });
     const [croppedImage, setCroppedImage] = useState<string | null>(null);
 
     const router = useRouter();
@@ -99,41 +126,49 @@ export default function SignUpBox() {
 
     const handleBack = () => setActiveStep((prev) => prev - 1);
 
-    const handleChange = (e) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
         setErrors((prev) => ({ ...prev, [name]: "" })); // Limpa o erro ao editar
     };
 
     const validateStep = () => {
-        let currentErrors = {};
+        let currentErrors: errorsType | null = {
+            name: '',
+            email: '',
+            username: '',
+            password: '',
+            confirmPassword: ''
+        };
 
-        if (activeStep === 0) {
-            if (!formData.name.trim()) currentErrors.name = "O nome é obrigatório.";
-            if (!formData.email.trim())
-                currentErrors.email = "O e-mail é obrigatório.";
-            else if (!/\S+@\S+\.\S+/.test(formData.email))
-                currentErrors.email = "Formato de e-mail inválido.";
+        if ((typeof currentErrors === 'object')) {
+            if (activeStep === 0) {
+                if (!formData.name.trim()) currentErrors.name = "O nome é obrigatório.";
+                if (!formData.email.trim())
+                    currentErrors.email = "O e-mail é obrigatório.";
+                else if (!/\S+@\S+\.\S+/.test(formData.email))
+                    currentErrors.email = "Formato de e-mail inválido.";
+            }
+
+            if (activeStep === 1) {
+                if (!formData.password.trim())
+                    currentErrors.password = "A senha é obrigatória.";
+                else if (formData.password.length < 6)
+                    currentErrors.password = "A senha deve ter no mínimo 6 caracteres.";
+                if (formData.password !== formData.confirmPassword)
+                    currentErrors.confirmPassword = "As senhas não coincidem.";
+            }
+
+            if (activeStep === 2) {
+                if (!formData.username.trim())
+                    currentErrors.username = "O nome de usuário é obrigatório.";
+                else if (!/^[a-zA-Z0-9_]+$/.test(formData.username))
+                    currentErrors.username =
+                        "O nome de usuário só pode conter letras, números e _.";
+            }
+            setErrors(currentErrors);
         }
 
-        if (activeStep === 1) {
-            if (!formData.password.trim())
-                currentErrors.password = "A senha é obrigatória.";
-            else if (formData.password.length < 6)
-                currentErrors.password = "A senha deve ter no mínimo 6 caracteres.";
-            if (formData.password !== formData.confirmPassword)
-                currentErrors.confirmPassword = "As senhas não coincidem.";
-        }
-
-        if (activeStep === 2) {
-            if (!formData.username.trim())
-                currentErrors.username = "O nome de usuário é obrigatório.";
-            else if (!/^[a-zA-Z0-9_]+$/.test(formData.username))
-                currentErrors.username =
-                    "O nome de usuário só pode conter letras, números e _.";
-        }
-
-        setErrors(currentErrors);
         return Object.keys(currentErrors).length === 0; // Passa para o próximo apenas se não houver erros
     };
 
@@ -146,7 +181,7 @@ export default function SignUpBox() {
             setCurrentSkill("");
         }
     };
-    const handleDeleteSkill = (skillToDelete) => {
+    const handleDeleteSkill = (skillToDelete: string) => {
         setFormData((prev) => ({
             ...prev,
             skills: prev.skills.filter((skill) => skill !== skillToDelete),
@@ -314,16 +349,16 @@ export default function SignUpBox() {
             position="absolute"
             top="50%"
             left="50%"
-            
+
             sx={{
                 bgcolor: "background.default",
                 color: "text.primary",
                 p: 3,
                 borderRadius: 2,
                 width: "100%",
-                maxWidth: {sm: 600, xs: '100%'},
-                height: {xs: '100%', sm: 'auto'},
-                display: {xs: 'flex', sm: 'block'},
+                maxWidth: { sm: 600, xs: '100%' },
+                height: { xs: '100%', sm: 'auto' },
+                display: { xs: 'flex', sm: 'block' },
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 transform: "translate(-50%, -50%)"
