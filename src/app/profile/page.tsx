@@ -24,19 +24,44 @@ import {
 } from "react-icons/ai";
 import { IoMdSettings } from "react-icons/io";
 
+// Definindo a interface para os dados do WorkerProfile
+interface WorkerProfile {
+  id: string;
+  userId: string;
+  profession: string;
+  skills: { id: string; name: string; category: string | null }[];
+  contactInfo: string | null;
+  rating: number | null;
+  completedTasks: number;
+  portfolio: { id: string; title: string; description: string; image: string | null; link: string | null }[];
+}
+
 const WorkerProfilePage = () => {
   const { user, isLoading } = useUser();
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [openPortfolioModal, setOpenPortfolioModal] = useState(false);
-  const [formData, setFormData] = useState({
+  
+  // Definindo o estado formData com tipos explícitos
+  const [formData, setFormData] = useState<{
+    about: string;
+    instagram: string;
+    twitter: string;
+    phone: string;
+  }>({
     about: "",
     instagram: "",
     twitter: "",
     phone: "",
   });
-  const [portfolio, setPortfolio] = useState([]);
-  const [originalData, setOriginalData] = useState({});
+
+  const [portfolio, setPortfolio] = useState<{ id: string; title: string; description: string; image: string | null; link: string | null }[]>([]);
+  const [originalData, setOriginalData] = useState({
+    about: "",
+    instagram: "",
+    twitter: "",
+    phone: "",
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 1500);
@@ -53,7 +78,7 @@ const WorkerProfilePage = () => {
       };
       setFormData(initialData);
       setOriginalData(initialData); // Armazena os dados originais para reverter, se necessário
-      setPortfolio(user.WorkerProfile?.portfolio || []);
+      // setPortfolio(user.WorkerProfile?.portfolio || []);
     }
   }, [user]);
 
@@ -65,7 +90,7 @@ const WorkerProfilePage = () => {
     setIsEditing(!isEditing);
   };
 
-  const handleInputChange = (field, value) => {
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData({ ...formData, [field]: value });
   };
 
@@ -79,11 +104,6 @@ const WorkerProfilePage = () => {
     console.log("Alterações salvas:", changesArray);
     setOriginalData(formData); // Atualiza os dados originais com os dados salvos
     setIsEditing(false);
-  };
-
-  const handleAddPortfolioItem = (newItem) => {
-    setPortfolio([...portfolio, newItem]);
-    setOpenPortfolioModal(false);
   };
 
   if (isLoading || loading) {
@@ -195,35 +215,36 @@ const WorkerProfilePage = () => {
                 label="Twitter"
                 value={formData.twitter}
                 onChange={(e) => handleInputChange("twitter", e.target.value)}
+                sx={{ mb: 2 }}
               />
             </>
           ) : (
-            <>
-              <Box display="flex" alignItems="center" gap={1} mb={1}>
-                <AiOutlinePhone />
-                <Typography color="textSecondary">{user.phone || "Não disponível"}</Typography>
-              </Box>
-              <Box display="flex" alignItems="center" gap={1} mb={1}>
-                <AiOutlineInstagram />
-                <Typography color="textSecondary">
-                  {user.instagram || "Não disponível"}
-                </Typography>
-              </Box>
-              <Box display="flex" alignItems="center">
-                <AiOutlineTwitter />
-                <Typography color="textSecondary">
-                  {user.twitter || "Não disponível"}
-                </Typography>
-              </Box>
-            </>
+            <Box>
+              <Typography color="textSecondary" mb={1}>
+                <AiOutlinePhone /> {formData.phone || "Não informado"}
+              </Typography>
+              <Typography color="textSecondary" mb={1}>
+                <AiOutlineInstagram /> {formData.instagram || "Não informado"}
+              </Typography>
+              <Typography color="textSecondary">
+                <AiOutlineTwitter /> {formData.twitter || "Não informado"}
+              </Typography>
+            </Box>
           )}
         </CardContent>
       </Card>
 
       {isEditing && (
-        <Button variant="contained" color="primary" onClick={handleSaveChanges} fullWidth>
-          Salvar Alterações
-        </Button>
+        <Box textAlign="center">
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSaveChanges}
+            sx={{ textTransform: "none", fontWeight: "bold" }}
+          >
+            Salvar Alterações
+          </Button>
+        </Box>
       )}
     </Container>
   );
