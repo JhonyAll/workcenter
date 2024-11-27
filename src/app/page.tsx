@@ -70,7 +70,7 @@ const Home = () => {
   }, []);
 
   return (
-    <Box sx={{ padding: { xs: 0, md: '20px 100px' }, maxWidth: '100vw', margin: '0 auto', gap: '20px', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ padding: { xs: '10px 20px', md: '20px 100px' }, maxWidth: '100%', margin: '0 auto', gap: '20px', display: 'flex', flexDirection: 'column' }}>
       {/* Seção de Posts */}
       <section>
         <Typography variant="h4" sx={{ fontWeight: 600, color: '#fff', marginBottom: 4 }}>

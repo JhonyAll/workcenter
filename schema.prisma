@@ -14,6 +14,10 @@ model User {
   id             String         @id @default(uuid())
   username       String         @unique
   about          String?
+  instagram      String?
+  twitter        String?
+  linkedin       String?
+  phone          String?
   password       String
   type           UserType       @default(CLIENT)
   name           String?
@@ -54,17 +58,32 @@ enum UserType {
 }
 
 model WorkerProfile {
-  id             String   @id @default(uuid())
-  user           User     @relation(fields: [userId], references: [id])
-  userId         String   @unique
+  id             String      @id @default(uuid())
+  user           User        @relation(fields: [userId], references: [id])
+  userId         String      @unique
   profession     String // Profissão principal do Worker
-  skills         Skill[]  @relation("WorkerSkills") // Vários skills
+  skills         Skill[]     @relation("WorkerSkills") // Vários skills
   contactInfo    String? // Informação de contato adicional (ex.: redes sociais)
   rating         Float? // Avaliação média do Worker
-  portfolio      String[] // URLs de imagens/textos mostrando trabalhos anteriores
+  portfolio      Portfolio[] @relation("WorkerPortfolio") // Relacionamento com Portfolios
   completedTasks Int // Número de tarefas concluídas
 
   @@map(name: "worker_profiles")
+}
+
+model Portfolio {
+  id          String        @id @default(uuid())
+  worker      WorkerProfile @relation("WorkerPortfolio", fields: [workerId], references: [id], onDelete: Cascade)
+  workerId    String
+  title       String // Título do projeto
+  description String? // Descrição do projeto
+  image       String? // URL da imagem representativa
+  link        String? // Link para o projeto completo (ex.: GitHub, Behance)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map(name: "portfolios")
 }
 
 model Message {
@@ -108,7 +127,7 @@ model Post {
   id          String    @id @default(uuid())
   title       String
   description String
-  gallery       String[] // Array de URLs para arquivos
+  gallery     String[] // Array de URLs para arquivos
   links       String[] // Array de URLs para links externos
   embedCode   String? // Código incorporado para tutoriais, opcional
   createdAt   DateTime  @default(now())

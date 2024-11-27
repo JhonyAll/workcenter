@@ -14,6 +14,9 @@ type UserWithWorkProfile = Prisma.UserGetPayload<{
     type: true,
     createdAt: true,
     updatedAt: true,
+    instagram: true,
+    twitter: true,
+    phone: true,
     about: true,
     WorkerProfile: {
       include: {
@@ -52,7 +55,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
     try {
       const response = await fetch("/api/auth/session", {
-
         credentials: "include",
       });
 

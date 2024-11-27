@@ -27,7 +27,7 @@ const LayoutWithNav = ({ children }: { children: React.ReactNode }) => (
   <div>
     <CreateMenuButton />
     <Navbar />
-    <main className="main col-span-11 h-full pt-20 pr-10">{children}</main>
+    <main className="main col-span-11 h-full py-20">{children}</main>
   </div>
 );
 

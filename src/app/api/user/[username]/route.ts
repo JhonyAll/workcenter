@@ -1,5 +1,7 @@
 // Importação das dependências necessárias
+import { verifyToken } from "@/lib/jwt";
 import prisma from "@/lib/prisma";
+import encryptPassword from "@/utils/encryptPassword";
 import { NextResponse, NextRequest } from "next/server";
 
 // Função para a requisição GET, buscando um usuário específico pelo username
@@ -65,3 +67,4 @@ export async function GET(
     );
   }
 }
+

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { AiOutlinePhone, AiOutlineMail, AiOutlineInstagram, AiOutlineLinkedin } from "react-icons/ai";
 import { BsChatText, BsFillStarFill } from "react-icons/bs";
+import { useRouter } from "next/navigation";
 import {
     Button, Card, CardContent, Typography, Chip, Container, Box, Divider, Avatar,
     CircularProgress,
@@ -42,6 +43,7 @@ type UserWithWorkProfile = Prisma.UserGetPayload<{
 
 const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }) => {
     const [user, setUser] = useState<UserWithWorkProfile | null>(null);
+    const router = useRouter(); // Hook para navegação
     // Estado para o perfil do trabalhador
     useEffect(() => {
         const fetchUser = async () => {
@@ -52,10 +54,24 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
     }, [params]);
 
     // Função de contato (para envio de mensagem ou interação)
-    const handleContact = () => {
-        // Simulação de um envio de mensagem ou interação
-        // alert("Mensagem enviada para " + worker.name);
+    const handleContact = async () => {
+        if (user) {
+            // Verifica se já existe um chat entre o usuário logado e o trabalhador
+            const response = await fetch(`/api/chat`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    user2Id: user?.id,
+                }),
+            });
+
+            const result = await response.json();
+
+            // Redireciona para o chat existente ou recém-criado
+            router.push(`/chat/${result.data.chatId}`);
+        }
     };
+
 
     if (!user) return <>Carregando...</>;
 
@@ -81,7 +97,7 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
                 <Button
                     variant="contained"
                     color="primary"
-                    onClick={() => alert("Abrindo chat com " + user.name)}
+                    onClick={handleContact}
                     startIcon={<BsChatText size={24} />}
                     sx={{
                         textTransform: "none", // Remove a capitalização automática

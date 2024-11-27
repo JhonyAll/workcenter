@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
     profilePhoto,
     profession,
     skills,
+    about
   } = body;
 
   const skillArray: [{ name: string }] = skills
@@ -46,6 +47,7 @@ export async function POST(req: NextRequest) {
           type,
           name,
           email,
+          about,
           profilePhoto,
           WorkerProfile: {
             create: {
@@ -61,7 +63,6 @@ export async function POST(req: NextRequest) {
               contactInfo: "",
               completedTasks: 0, // Define o valor inicial como 0,
               rating: 0,
-              portfolio: [],
             },
           },
         },
@@ -82,6 +83,7 @@ export async function POST(req: NextRequest) {
           name,
           email,
           profilePhoto,
+          about
         },
       });
     }
@@ -89,20 +91,6 @@ export async function POST(req: NextRequest) {
     if (!user) {
       throw new Error("Erro ao criar usuário");
     }
-
-    // let workerProfile = null;
-    // if (type === "WORKER") {
-    //     workerProfile = await prisma.workerProfile.create({
-    //         data: {
-    //             userId: user.id,
-    //             profession,
-    //             skills,
-    //             contactInfo,
-    //             completedTasks: 0, // Define o valor inicial como 0
-    //             portfolio: [],
-    //         },
-    //     });
-    // }
 
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, {
       expiresIn: "7d",
@@ -148,3 +136,4 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+

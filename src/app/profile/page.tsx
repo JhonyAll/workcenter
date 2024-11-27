@@ -8,28 +8,83 @@ import {
   Button,
   Card,
   CardContent,
-  Chip,
   CircularProgress,
   Container,
   Divider,
   Grid,
-  IconButton,
+  Modal,
   Skeleton,
+  TextField,
   Typography,
 } from "@mui/material";
-import { AiOutlinePhone, AiOutlineMail, AiOutlineInstagram, AiOutlineLinkedin } from "react-icons/ai";
-import { BsChatText, BsFillStarFill } from "react-icons/bs";
+import {
+  AiOutlinePhone,
+  AiOutlineInstagram,
+  AiOutlineTwitter,
+} from "react-icons/ai";
 import { IoMdSettings } from "react-icons/io";
 
 const WorkerProfilePage = () => {
-  const { user, isLoading } = useUser(); // Considerando que isLoading já está implementado no contexto
+  const { user, isLoading } = useUser();
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
+  const [openPortfolioModal, setOpenPortfolioModal] = useState(false);
+  const [formData, setFormData] = useState({
+    about: "",
+    instagram: "",
+    twitter: "",
+    phone: "",
+  });
+  const [portfolio, setPortfolio] = useState([]);
+  const [originalData, setOriginalData] = useState({});
 
-  // Simula carregamento para Skeleton
-  useEffect((): void | (() => void) => {
-    const timer = setTimeout(() => setLoading(false), 1500); // Simula 1.5s de carregamento
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 1500);
     return () => clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      const initialData = {
+        about: user.about || "",
+        instagram: user.instagram || "",
+        twitter: user.twitter || "",
+        phone: user.phone || "",
+      };
+      setFormData(initialData);
+      setOriginalData(initialData); // Armazena os dados originais para reverter, se necessário
+      setPortfolio(user.WorkerProfile?.portfolio || []);
+    }
+  }, [user]);
+
+  const handleEditToggle = () => {
+    if (isEditing) {
+      // Reverte as mudanças
+      setFormData(originalData);
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+  };
+
+  const handleSaveChanges = () => {
+    const changesArray = [
+      { field: "about", value: formData.about },
+      { field: "instagram", value: formData.instagram },
+      { field: "twitter", value: formData.twitter },
+      { field: "phone", value: formData.phone },
+    ];
+    console.log("Alterações salvas:", changesArray);
+    setOriginalData(formData); // Atualiza os dados originais com os dados salvos
+    setIsEditing(false);
+  };
+
+  const handleAddPortfolioItem = (newItem) => {
+    setPortfolio([...portfolio, newItem]);
+    setOpenPortfolioModal(false);
+  };
 
   if (isLoading || loading) {
     return (
@@ -67,76 +122,51 @@ const WorkerProfilePage = () => {
         <Typography variant="h5" fontWeight="bold">
           {user.name}
         </Typography>
+        <Typography variant="subtitle1" color="textSecondary">
+          @{user.username}
+        </Typography>
         {user.WorkerProfile && (
           <Typography variant="subtitle1" color="textSecondary">
             {user.WorkerProfile.profession}
           </Typography>
         )}
-      </Box>
-
-      {/* Botão de mensagem */}
-      <Box display="flex" justifyContent="center">
         <Button
           variant="contained"
           color="primary"
-          onClick={() => alert("Abrindo chat com " + user.name)}
-          startIcon={<IoMdSettings  size={24} />}
+          onClick={handleEditToggle}
+          startIcon={<IoMdSettings />}
           sx={{
-            textTransform: "none", // Remove a capitalização automática
+            textTransform: "none",
             fontWeight: "bold",
             fontSize: "1rem",
-            padding: "8px 16px", // Espaçamento interno,
-            marginBottom: '8px',
-            gap: 1.5, // Espaço entre o ícone e o texto
-            '&:hover': {
-              backgroundColor: "rgba(103, 58, 183, 0.85)", // Customiza o hover
-            },
+            mt: 2,
           }}
         >
-          Editar Perfil
+          {isEditing ? "Cancelar" : "Editar Perfil"}
         </Button>
       </Box>
 
-
-      {/* Sobre mim */}
+      {/* Sobre Mim */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Typography variant="h6" fontWeight="bold" gutterBottom>
             Sobre mim
           </Typography>
-          <Typography color="textSecondary">
-            {user.about ||
-              "Este usuário ainda não acrescentou uma descrição sobre ele."}
-          </Typography>
+          {isEditing ? (
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              value={formData.about}
+              onChange={(e) => handleInputChange("about", e.target.value)}
+            />
+          ) : (
+            <Typography color="textSecondary">
+              {formData.about || "Este usuário ainda não acrescentou uma descrição sobre ele."}
+            </Typography>
+          )}
         </CardContent>
       </Card>
-
-      {/* Avaliação */}
-      {user.WorkerProfile && (
-        <Box display="flex" alignItems="center" gap={1} mb={3}>
-          <BsFillStarFill color="#FFD700" />
-          <Typography variant="h6">{user.WorkerProfile.rating || "N/A"}</Typography>
-          <Typography color="textSecondary">
-            ({user.WorkerProfile.completedTasks} tarefas concluídas)
-          </Typography>
-        </Box>
-      )}
-
-      {/* Habilidades */}
-      { user.WorkerProfile?.skills && user.WorkerProfile?.skills?.length > 0 && (
-        <Card sx={{ mb: 3 }}>
-          <CardContent>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
-              Habilidades
-            </Typography>
-            <Box display="flex" flexWrap="wrap" gap={1}>
-              {user.WorkerProfile?.skills.map((skill, index) => (
-                <Chip key={index} label={skill.name} color="primary" />
-              ))}
-            </Box>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Contatos */}
       <Card sx={{ mb: 3 }}>
@@ -144,62 +174,57 @@ const WorkerProfilePage = () => {
           <Typography variant="h6" fontWeight="bold" gutterBottom>
             Contatos
           </Typography>
-          {/* <Box display="flex" alignItems="center" gap={1} mb={1}>
-            <AiOutlinePhone />
-            <Typography color="textSecondary">{user.phone || "Não disponível"}</Typography>
-          </Box> */}
-          <Box display="flex" alignItems="center" gap={1} mb={1}>
-            <AiOutlineMail />
-            <Typography color="textSecondary">{user.email || "Não disponível"}</Typography>
-          </Box>
-          {/* <Box display="flex" alignItems="center" gap={1} mb={1}>
-            <AiOutlineInstagram />
-            <a href={user.WorkerProfile?.socialLinks?.instagram || "#"} target="_blank" rel="noopener noreferrer">
-              Instagram
-            </a>
-          </Box>
-          <Box display="flex" alignItems="center" gap={1}>
-            <AiOutlineLinkedin />
-            <a href={user.WorkerProfile?.socialLinks?.linkedin || "#"} target="_blank" rel="noopener noreferrer">
-              LinkedIn
-            </a>
-          </Box> */}
+          {isEditing ? (
+            <>
+              <TextField
+                fullWidth
+                label="Telefone"
+                value={formData.phone}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Instagram"
+                value={formData.instagram}
+                onChange={(e) => handleInputChange("instagram", e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Twitter"
+                value={formData.twitter}
+                onChange={(e) => handleInputChange("twitter", e.target.value)}
+              />
+            </>
+          ) : (
+            <>
+              <Box display="flex" alignItems="center" gap={1} mb={1}>
+                <AiOutlinePhone />
+                <Typography color="textSecondary">{user.phone || "Não disponível"}</Typography>
+              </Box>
+              <Box display="flex" alignItems="center" gap={1} mb={1}>
+                <AiOutlineInstagram />
+                <Typography color="textSecondary">
+                  {user.instagram || "Não disponível"}
+                </Typography>
+              </Box>
+              <Box display="flex" alignItems="center">
+                <AiOutlineTwitter />
+                <Typography color="textSecondary">
+                  {user.twitter || "Não disponível"}
+                </Typography>
+              </Box>
+            </>
+          )}
         </CardContent>
       </Card>
 
-      {/* Portfólio */}
-      {/* {user.WorkerProfile?.portfolio && user.WorkerProfile?.portfolio?.length > 0 && (
-        <Box>
-          <Typography variant="h6" fontWeight="bold" gutterBottom>
-            Portfólio
-          </Typography>
-          <Grid container spacing={2}>
-            {user.WorkerProfile.portfolio.map((project, index) => (
-              <Grid item xs={12} sm={6} key={index}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="subtitle1" fontWeight="bold">
-                      {project.name}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary" gutterBottom>
-                      {project.description}
-                    </Typography>
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      fullWidth
-                      href={project.link}
-                      target="_blank"
-                    >
-                      Ver projeto
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      )} */}
+      {isEditing && (
+        <Button variant="contained" color="primary" onClick={handleSaveChanges} fullWidth>
+          Salvar Alterações
+        </Button>
+      )}
     </Container>
   );
 };
