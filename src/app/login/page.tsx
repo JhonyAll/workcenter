@@ -1,20 +1,46 @@
 import React from "react";
-import logo from '@/assets/img/logo.svg'
-import SignIn from "@/components/SignInBox";
+import { Box, Typography } from "@mui/material";
 import Image from "next/image";
-import styles from './styles.module.css'
-
+import logo from "@/assets/img/logo.svg";
+import SignInBox from "@/components/SignInBox";
+import fundo from "./fundo.jpeg"
 
 const LoginPage = () => {
-   return (
-    <div className="w-screen h-max-screen h-screen grid grid-cols-7 justify-center items-center">
-      <div className={"col-span-3 lg:col-span-4 bg-gray-50 hidden md:flex flex-col justify-center items-center h-full w-full gap-5 " + styles.bg}>
-        <Image src={logo} alt="Workcenter logo" className="w-4/5" />
-        <h1 className="text-2xl lg:text-3xl font-bold text-center mb-4 text-white">Bem-vindo!</h1>
-        <p className="text-sm lg:text-base font-medium text-justify px-8 lg:px-20 text-white">Conecte-se à sua conta e continue construindo sua carreira como freelancer ou encontrando os profissionais perfeitos para o seu projeto. Explore oportunidades, compartilhe seu talento e faça parte de uma comunidade que valoriza o seu trabalho.</p>
-      </div>
-      <SignIn/>
-    </div>
+  return (
+    <Box
+      display="grid"
+      gridTemplateColumns={{ xs: "1fr", md: "4fr 5fr" }}
+      height="100vh"
+      bgcolor="#f5f5f5"
+    >
+      {/* Lado esquerdo com boas-vindas */}
+      <Box
+        display={{ xs: "none", md: "flex" }}
+        flexDirection="column"
+        justifyContent="center"
+        bgcolor="#f5f5f5"
+        alignItems="center"
+        px={4}
+        color="#fff"
+        sx={{
+          backgroundImage: `url("https://firebasestorage.googleapis.com/v0/b/workcenter-af37b.appspot.com/o/fundo.jpeg?alt=media&token=c7786c8c-07cb-4b67-908f-fef65bc26aaf")`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
+      >
+        <Image src={logo} alt="Workcenter logo" width={350} height={350} />
+        <Typography variant="h4" fontWeight="bold" textAlign="center" mt={2} mb={4}>
+          Bem-vindo!
+        </Typography>
+        <Typography variant="body1" textAlign="justify" mt={2} maxWidth="80%">
+          Conecte-se à sua conta e continue construindo sua carreira como freelancer ou encontrando profissionais para seu projeto.
+        </Typography>
+      </Box>
+
+      {/* Formulário de login */}
+      <SignInBox />
+    </Box>
   );
 };
 

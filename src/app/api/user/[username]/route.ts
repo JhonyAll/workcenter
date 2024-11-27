@@ -22,6 +22,11 @@ export async function GET(
         profilePhoto: true,
         createdAt: true,
         updatedAt: true,
+        WorkerProfile: {
+          include: {
+            skills: true
+          }
+        }
       },
     });
 

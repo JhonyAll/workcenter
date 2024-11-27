@@ -37,7 +37,7 @@ export const verifyTokenAndGetUser = async (req: NextRequest): Promise<UserAuthD
 
   try {
     // Alteração: A requisição foi modificada para /session
-    const response = await fetch(`${req.nextUrl.origin}/api/session`, {
+    const response = await fetch(`${req.nextUrl.origin}/api/auth/session`, {
       method: 'GET',
       headers: {
         authorization: `Bearer ${token}`,

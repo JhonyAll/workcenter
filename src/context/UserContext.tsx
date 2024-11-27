@@ -2,8 +2,28 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { User } from "@prisma/client";
 import { useRouter } from "next/navigation";
 
+import type { Prisma } from "@prisma/client";
+
+type UserWithWorkProfile = Prisma.UserGetPayload<{
+  select: {
+    id: true,
+    name: true,
+    username: true,
+    email: true,
+    profilePhoto: true,
+    type: true,
+    createdAt: true,
+    updatedAt: true,
+    WorkerProfile: {
+      include: {
+        skills: true
+      }
+    }
+  }
+}>
+
 type UserContextType = {
-  user: User | null;
+  user: UserWithWorkProfile | null;
   isLoading: boolean;
   error: string | null;
   refreshUser: () => Promise<void>;
@@ -20,7 +40,7 @@ export const useUser = () => {
 };
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserWithWorkProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter()
@@ -30,8 +50,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     setError(null);
 
     try {
-      const response = await fetch("/api/session", {
-        
+      const response = await fetch("/api/auth/session", {
+
         credentials: "include",
       });
 
@@ -42,7 +62,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       const data = await response.json();
 
       if (!data.isAuthenticated) {
-        await fetch("/api/logout")
+        await fetch("/api/auth/logout")
         setUser(null);
         return router.push("/login")
       }

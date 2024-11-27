@@ -1,173 +1,206 @@
 "use client";
 
 import { useUser } from "@/context/UserContext";
-import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  CircularProgress,
+  Container,
+  Divider,
+  Grid,
+  IconButton,
+  Skeleton,
+  Typography,
+} from "@mui/material";
 import { AiOutlinePhone, AiOutlineMail, AiOutlineInstagram, AiOutlineLinkedin } from "react-icons/ai";
-import { BsFillStarFill } from "react-icons/bs";
-import Modal from "react-modal";
-
-// Tipagem para o tipo do portfólio
-interface PortfolioItem {
-  name: string;
-  description: string;
-  imageUrl: string;
-  link: string;
-}
+import { BsChatText, BsFillStarFill } from "react-icons/bs";
 
 const WorkerProfilePage = () => {
-  // Estado para o perfil do trabalhador
-  const [worker, setWorker] = useState({
-    name: "Carlos Silva",
-    profession: "Programador Web",
-    bio: "Desenvolvedor full-stack com 5 anos de experiência em desenvolvimento de sistemas e aplicativos web. Apaixonado por código limpo e projetos inovadores.",
-    phone: "(11) 98765-4321",
-    email: "carlos.silva@email.com",
-    socialLinks: {
-      instagram: "https://instagram.com/carlosdev",
-      linkedin: "https://linkedin.com/in/carlosdev",
-    },
-    skills: ["JavaScript", "React", "Node.js", "CSS", "Python"],
-    completedTasks: 15,
-    rating: 4.8,
-    portfolio: [
-      { name: "Projeto X", description: "Sistema de gerenciamento de tarefas com funcionalidades avançadas de colaboração e produtividade.", imageUrl: "https://via.placeholder.com/300", link: "/projects/1" },
-      { name: "Aplicativo Y", description: "Aplicativo móvel para gestão de dietas com recursos de personalização e rastreamento de nutrientes.", imageUrl: "https://via.placeholder.com/300", link: "/projects/2" },
-    ],
-  });
+  const { user, isLoading } = useUser(); // Considerando que isLoading já está implementado no contexto
+  const [loading, setLoading] = useState(true);
 
-  // Estado para controle do modal
-  const [modalIsOpen, setModalIsOpen] = useState(false);
-  const [currentProject, setCurrentProject] = useState<PortfolioItem | null>(null);
+  // Simula carregamento para Skeleton
+  useState(() => {
+    const timer = setTimeout(() => setLoading(false), 1500); // Simula 1.5s de carregamento
+    return () => clearTimeout(timer);
+  }, []);
 
-  // Função para abrir o modal
-  const openModal = (project: PortfolioItem) => {
-    setCurrentProject(project);
-    setModalIsOpen(true);
-  };
+  if (isLoading || loading) {
+    return (
+      <Container maxWidth="sm">
+        <Box display="flex" flexDirection="column" alignItems="center" gap={2} mt={5}>
+          <Skeleton variant="circular" width={120} height={120} />
+          <Skeleton variant="text" width="80%" height={30} />
+          <Skeleton variant="text" width="60%" height={20} />
+          <Divider sx={{ width: "100%", my: 2 }} />
+          <Skeleton variant="rectangular" width="100%" height={150} />
+          <Skeleton variant="rectangular" width="100%" height={250} sx={{ mt: 2 }} />
+        </Box>
+      </Container>
+    );
+  }
 
-  // Função para fechar o modal
-  const closeModal = () => {
-    setModalIsOpen(false);
-    setCurrentProject(null);
-  };
-
-  // Função de contato (para envio de mensagem ou interação)
-  const handleContact = () => {
-    // Simulação de um envio de mensagem ou interação (aqui você pode fazer o que for necessário)
-    alert("Mensagem enviada para " + worker.name);
-  };
-
-  const { user } = useUser()
-
-  if(!user) return
+  if (!user) {
+    return (
+      <Container maxWidth="sm" sx={{ mt: 5 }}>
+        <Typography variant="h5" textAlign="center">
+          Usuário não encontrado.
+        </Typography>
+      </Container>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white p-4 pb-40">
-      {/* Cabeçalho com imagem de capa e avatar */}
-      <div className="relative">
-        <img
-          src="https://via.placeholder.com/1500x500/6b21a8/ffffff"
-          alt="Capa"
-          className="w-full h-48 object-cover rounded-t-lg"
+    <Container maxWidth="sm" sx={{ mt: 5 }}>
+      {/* Header do perfil */}
+      <Box display="flex" flexDirection="column" alignItems="center" mb={3}>
+        <Avatar
+          src={user.profilePhoto || "https://via.placeholder.com/120"}
+          alt={user.name}
+          sx={{ width: 120, height: 120, mb: 2 }}
         />
-        <div className="absolute top-36 left-6">
-          <Image
-            src={user.profilePhoto}
-            alt="Avatar"
-            width={128}
-            height={128}
-            className="rounded-full border-4 border-purple-600"
-          />
-        </div>
-      </div>
+        <Typography variant="h5" fontWeight="bold">
+          {user.name}
+        </Typography>
+        {user.WorkerProfile && (
+          <Typography variant="subtitle1" color="textSecondary">
+            {user.WorkerProfile.profession}
+          </Typography>
+        )}
+      </Box>
 
-      {/* Informações do Perfil */}
-      <div className="mt-32 px-6">
-        <h1 className="text-3xl font-semibold">{user.name}</h1>
-        <h2 className="text-xl text-gray-400 mb-4">{worker.profession}</h2>
-
-        {/* Descrição sobre o trabalhador */}
-        <div className="bg-gradient-to-r from-gray-900 via-purple-600 to-purple-900 p-6 rounded-lg mb-6">
-          <h3 className="text-lg font-semibold mb-2">Sobre Mim</h3>
-          <p>{worker.bio}</p>
-        </div>
-
-        {/* Avaliação do trabalhador */}
-        <div className="flex items-center mb-4">
-          <BsFillStarFill className="text-yellow-400 text-lg" />
-          <span className="ml-2 text-xl">{worker.rating}</span>
-          <span className="text-gray-400 ml-2">({worker.completedTasks} tarefas concluídas)</span>
-        </div>
-
-        {/* Habilidades */}
-        <div className="bg-gradient-to-r from-purple-700 via-purple-600 to-gray-900 p-6 rounded-lg mb-6">
-          <h3 className="text-lg font-semibold mb-2">Habilidades</h3>
-          <ul className="flex flex-wrap gap-3">
-            {worker.skills.map((skill, index) => (
-              <li key={index} className="bg-purple-600 text-white px-4 py-2 rounded-full">{skill}</li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Informações de Contato */}
-        <div className="bg-gradient-to-b from-purple-700 via-purple-800 to-gray-900 p-6 rounded-lg mb-6">
-          <h3 className="text-lg font-semibold mb-2">Informações de Contato</h3>
-          <div className="flex items-center mb-2">
-            <AiOutlinePhone className="text-purple-400 text-lg" />
-            <span className="ml-4">{worker.phone}</span>
-          </div>
-          <div className="flex items-center mb-2">
-            <AiOutlineMail className="text-purple-400 text-lg" />
-            <span className="ml-4">{worker.email}</span>
-          </div>
-          <div className="flex items-center mb-2">
-            <AiOutlineInstagram className="text-purple-400 text-lg" />
-            <a href={worker.socialLinks.instagram} className="ml-4 text-purple-400 hover:underline">
-              {worker.socialLinks.instagram}
-            </a>
-          </div>
-          <div className="flex items-center mb-2">
-            <AiOutlineLinkedin className="text-purple-400 text-lg" />
-            <a href={worker.socialLinks.linkedin} className="ml-4 text-purple-400 hover:underline">
-              {worker.socialLinks.linkedin}
-            </a>
-          </div>
-        </div>
-
-        {/* Portfólio */}
-        <div className="bg-gradient-to-r from-purple-700 via-purple-800 to-purple-900 p-6 rounded-lg mb-6">
-          <h3 className="text-lg font-semibold mb-2">Portfólio</h3>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {worker.portfolio.map((project, index) => (
-              <li key={index} className="bg-gray-800 p-4 rounded-lg shadow-lg relative">
-                <img
-                  src={project.imageUrl}
-                  alt={project.name}
-                  className="w-full h-48 object-cover rounded-t-lg mb-4"
-                />
-                <h4 className="text-xl font-semibold mb-2">{project.name}</h4>
-                <p className="text-gray-300 mb-4">{project.description}</p>
-                <button
-                  onClick={() => openModal(project)}
-                  className="bg-purple-600 text-white py-2 px-4 rounded-full hover:bg-purple-500"
-                >
-                  Ver Mais
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Botão para contratar */}
-        <button
-          onClick={handleContact}
-          className="w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-500"
+      {/* Botão de mensagem */}
+      <Box display="flex" justifyContent="center">
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => alert("Abrindo chat com " + user.name)}
+          startIcon={<BsChatText size={24} />}
+          sx={{
+            textTransform: "none", // Remove a capitalização automática
+            fontWeight: "bold",
+            fontSize: "1rem",
+            padding: "8px 16px", // Espaçamento interno,
+            marginBottom: '8px',
+            gap: 1.5, // Espaço entre o ícone e o texto
+            '&:hover': {
+              backgroundColor: "rgba(103, 58, 183, 0.85)", // Customiza o hover
+            },
+          }}
         >
           Enviar Mensagem
-        </button>
-      </div>
-    </div>
+        </Button>
+      </Box>
+
+
+      {/* Sobre mim */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>
+            Sobre mim
+          </Typography>
+          <Typography color="textSecondary">
+            {user.bio ||
+              "Este usuário ainda não acrescentou uma descrição sobre ele."}
+          </Typography>
+        </CardContent>
+      </Card>
+
+      {/* Avaliação */}
+      {user.WorkerProfile && (
+        <Box display="flex" alignItems="center" gap={1} mb={3}>
+          <BsFillStarFill color="#FFD700" />
+          <Typography variant="h6">{user.WorkerProfile.rating || "N/A"}</Typography>
+          <Typography color="textSecondary">
+            ({user.WorkerProfile.completedTasks} tarefas concluídas)
+          </Typography>
+        </Box>
+      )}
+
+      {/* Habilidades */}
+      {user.WorkerProfile?.skills?.length > 0 && (
+        <Card sx={{ mb: 3 }}>
+          <CardContent>
+            <Typography variant="h6" fontWeight="bold" gutterBottom>
+              Habilidades
+            </Typography>
+            <Box display="flex" flexWrap="wrap" gap={1}>
+              {user.WorkerProfile.skills.map((skill, index) => (
+                <Chip key={index} label={skill.name} color="primary" />
+              ))}
+            </Box>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Contatos */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>
+            Contatos
+          </Typography>
+          <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <AiOutlinePhone />
+            <Typography color="textSecondary">{user.phone || "Não disponível"}</Typography>
+          </Box>
+          <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <AiOutlineMail />
+            <Typography color="textSecondary">{user.email || "Não disponível"}</Typography>
+          </Box>
+          <Box display="flex" alignItems="center" gap={1} mb={1}>
+            <AiOutlineInstagram />
+            <a href={user.WorkerProfile?.socialLinks?.instagram || "#"} target="_blank" rel="noopener noreferrer">
+              Instagram
+            </a>
+          </Box>
+          <Box display="flex" alignItems="center" gap={1}>
+            <AiOutlineLinkedin />
+            <a href={user.WorkerProfile?.socialLinks?.linkedin || "#"} target="_blank" rel="noopener noreferrer">
+              LinkedIn
+            </a>
+          </Box>
+        </CardContent>
+      </Card>
+
+      {/* Portfólio */}
+      {user.WorkerProfile?.portfolio?.length > 0 && (
+        <Box>
+          <Typography variant="h6" fontWeight="bold" gutterBottom>
+            Portfólio
+          </Typography>
+          <Grid container spacing={2}>
+            {user.WorkerProfile.portfolio.map((project, index) => (
+              <Grid item xs={12} sm={6} key={index}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="subtitle1" fontWeight="bold">
+                      {project.name}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                      {project.description}
+                    </Typography>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      fullWidth
+                      href={project.link}
+                      target="_blank"
+                    >
+                      Ver projeto
+                    </Button>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
+    </Container>
   );
 };
 

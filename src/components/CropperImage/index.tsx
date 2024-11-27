@@ -1,12 +1,25 @@
-'use client'
+"use client";
+
 import React, { useEffect, useRef, useState, ChangeEvent } from "react";
 import { Cropper, CropperRef, CircleStencil } from "react-advanced-cropper";
 import "react-advanced-cropper/dist/style.css";
-import "./styles.scss";
-import Image from "next/image";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  Typography,
+  Avatar,
+  IconButton,
+} from "@mui/material";
 import { FaUserCircle } from "react-icons/fa";
 
-const ImageCropper = ({onImageCropped}: {onImageCropped: React.Dispatch<React.SetStateAction<string | null>>}) => {
+const ImageCropper = ({
+  onImageCropped,
+}: {
+  onImageCropped: React.Dispatch<React.SetStateAction<string | null>>;
+}) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const cropperRef = useRef<CropperRef>(null);
   const [imgCropped, setImgCropped] = useState<string | null>(null);
@@ -24,9 +37,10 @@ const ImageCropper = ({onImageCropped}: {onImageCropped: React.Dispatch<React.Se
     if (cropper) {
       const canvas = cropper.getCanvas();
       if (canvas) {
-        setImgCropped(canvas.toDataURL());
+        const croppedImage = canvas.toDataURL();
+        setImgCropped(croppedImage);
+        onImageCropped(croppedImage);
         setIsModalOpen(false); // Fecha o modal após o corte
-        onImageCropped(canvas.toDataURL())
       }
     }
   };
@@ -49,14 +63,18 @@ const ImageCropper = ({onImageCropped}: {onImageCropped: React.Dispatch<React.Se
   }, [image]);
 
   return (
-    <div className="imageCropper">
-      <div className="profile-icon rounded-full" onClick={onUpload}>
+    <Box sx={{ textAlign: "center", mt: 2 }}>
+      <IconButton onClick={onUpload} sx={{ p: 0 }}>
         {imgCropped ? (
-          <Image src={imgCropped} className="rounded-full" alt="Profile" width={200} height={200} />
+          <Avatar
+            src={imgCropped}
+            alt="Profile"
+            sx={{ width: 100, height: 100 }}
+          />
         ) : (
           <FaUserCircle size={200} color="#cccccc" />
         )}
-      </div>
+      </IconButton>
       <input
         ref={inputRef}
         type="file"
@@ -64,25 +82,35 @@ const ImageCropper = ({onImageCropped}: {onImageCropped: React.Dispatch<React.Se
         onChange={onLoadImage}
         style={{ display: "none" }}
       />
-      {isModalOpen && (
-        <div className="modal z-20">
-          <div className="modal-content">
-            <div className="cropper-wrapper">
-              <Cropper
-                ref={cropperRef}
-                className="imageCropper__cropper"
-                backgroundClassName="imageCropper__cropper-background"
-                src={image || ""}
-                stencilComponent={CircleStencil}
-              />
-            </div>
-            <button className="imageCropper__button font-bold text-lg " onClick={onCrop}>
-              Salvar
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+      <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <DialogContent sx={{ width: "100%", maxWidth: 500 }}>
+          <Typography variant="h6" textAlign="center" sx={{ mb: 2 }}>
+            Ajuste a Imagem
+          </Typography>
+          <Cropper
+            ref={cropperRef}
+            className="imageCropper__cropper"
+            src={image || ""}
+            stencilComponent={CircleStencil}
+            style={{
+              height: 300,
+              width: "100%",
+              backgroundColor: "#f0f0f0",
+              borderRadius: "8px",
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="contained"
+            onClick={onCrop}
+            sx={{ mx: "auto", px: 4 }}
+          >
+            Salvar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 

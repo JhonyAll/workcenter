@@ -1,10 +1,11 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from "react"
-import type { Prisma } from "@prisma/client";
-import Image from "next/image";
-import Link from "next/link";
-import { FaUserCircle } from "react-icons/fa";
+import { useEffect, useState } from 'react';
+import type { Prisma } from '@prisma/client';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Box, Typography, Button, Avatar, Card, Skeleton, TextField, Divider } from '@mui/material';
+import { FaUserCircle } from 'react-icons/fa';
 
 type PostWithRelations = Prisma.PostGetPayload<{
   include: {
@@ -19,131 +20,189 @@ type PostWithRelations = Prisma.PostGetPayload<{
   };
 }>;
 
-const PostPage = ({
-  params,
-}: {
-  params: Promise<{ postId: string }>
-}) => {
-  const [post, setPost] = useState<PostWithRelations | null>(null)
+const PostPage = ({ params }: { params: Promise<{ postId: string }> }) => {
+  const [post, setPost] = useState<PostWithRelations | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPost = async () => {
-      const { postId } = await params
-      await fetch(`/api/posts/${postId}`).then(response => response.json()).then(responseJson => setPost(responseJson.data.post))
-    }
-    fetchPost()
-  }, [])
+      const { postId } = await params;
+      const response = await fetch(`/api/posts/${postId}`);
+      const data = await response.json();
+      setPost(data?.data?.post);
+      setLoading(false);
+    };
+    fetchPost();
+  }, [params]);
 
   return (
-    <div>
-      {post ? (
-        <div className="p-4 pt-10 rounded-lg flex flex-col gap-8">
-          <div>
-
-            <Link href={`/user/${post.author.id}`} className="flex gap-4 items-center">
-            {!(post.author.profilePhoto === 'N/A') ? (
-              <Image
-                src={post.author.profilePhoto}
-                className="rounded-full border-2 border-purple-500"
-                alt="Profile"
-                width={50}
-                height={50}
-              />
+    <Box sx={{ padding: 4, margin: '0 auto', maxWidth: 800 }}>
+      {loading ? (
+        <SkeletonLoader />
+      ) : post ? (
+        <Box display="flex" flexDirection="column" gap={4}>
+          {/* Autor e Data */}
+          <Box display="flex" alignItems="center" gap={2}>
+            {post.author.profilePhoto && post.author.profilePhoto !== 'N/A' ? (
+              <Avatar src={post.author.profilePhoto} alt={post.author.username} sx={{ width: 56, height: 56 }} />
             ) : (
-              <FaUserCircle size={50} color="#A3A3A3" />
+              <Avatar sx={{ width: 56, height: 56, bgcolor: 'grey.400' }}>
+                <FaUserCircle size={28} />
+              </Avatar>
             )}
-              <p className="font-medium text-lg">{post.author.username}</p>
-            </Link>
-            <span className="text-gray-500 text-sm mt-4">Data de publicação: {post.createdAt.toString()}</span>
-          </div>
-          <h1 className="text-4xl text-purple-400 font-extrabold  text-center">{post.title}</h1>
+            <Box>
+              <Link href={`/user/${post.author.username}`} passHref>
+                <Typography variant="h6" fontWeight="bold" color="primary">
+                  {post.author.username}
+                </Typography>
+              </Link>
+              <Typography variant="caption" color="text.secondary">
+                Publicado em: {new Date(post.createdAt).toLocaleDateString()}
+              </Typography>
+            </Box>
+          </Box>
 
+          {/* Título */}
+          <Typography variant="h4" fontWeight="bold" textAlign="center" color="primary.main">
+            {post.title}
+          </Typography>
 
-          <p className="mt-12 text-justify break-words whitespace-pre-wrap">{post.description}</p>
-          <div className="md:grid-cols-3 md:grid gap-3 col-span-2">
-            {post.gallery.map((media, indx) => media.includes(".mp4") || media.includes(".webm") ? (<video
-              controls
-              width={500} height={500}
-              className="object-cover rounded-xl"
-              key={indx}
-            >
-              <source src={media} type="video/mp4" />
-              Seu navegador não suporta a reprodução de vídeo.
-            </video>) : (<Image
-              key={indx}
-              src={media}
-              width={500} height={500} className="rounded-xl object-cover "
-              alt=""
-            />))
-            }
-          </div>
-          <div className="flex flex-col">
-            <div className="flex flex-wrap mt-4 gap-2">
-              {
-                post.hashtags.map((hashtag, indx) => (<Link key={indx}
-                  className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm"
-                  href={`/categories/${hashtag.id}`}
+          {/* Descrição */}
+          <Typography variant="body1" textAlign="justify" color="text.primary">
+            {post.description}
+          </Typography>
+
+          {/* Galeria */}
+          <Box display="grid" gridTemplateColumns={{ xs: '1fr', md: 'repeat(3, 1fr)' }} gap={2}>
+            {post.gallery.map((media, index) =>
+              media.includes('.mp4') || media.includes('.webm') ? (
+                <video
+                  key={index}
+                  controls
+                  width="100%"
+                  style={{ borderRadius: '8px' }}
+                  className="media-item"
                 >
-                  #{hashtag.name}
-                </Link>))
-              }
-            </div>
-            <div className="mt-4">
-              <ul className="list-disc list-inside">
-                {
-                  post.links.map((link, indx) => (<li key={indx}>
-                    <a href={link} target="_blank" rel="noopener noreferrer" className="text-purple-300 underline">
-                      {link}
-                    </a>
-                  </li>))
-                }
-              </ul>
-            </div>
-          </div>
-          <div>
-            {
-              post.embedCode && (<><h1 className="font-bold text-lg">Código Anexo</h1>
-                <pre className="mt-4 bg-gray-800 p-4 rounded-lg overflow-auto">
-                  <code>{post.embedCode}</code>
-                </pre></>)
-            }
-
-          </div>
-        </div>) : (<div className="p-4 pt-10 rounded-lg flex flex-col gap-8 animate-pulse">
-          {/* Título do post */}
-          <div className="h-8 bg-gray-300 rounded w-1/2 mx-auto"></div>
-
-          {/* Parágrafo */}
-          <div className="space-y-2 mt-12">
-            <div className="h-4 bg-gray-300 rounded w-full"></div>
-            <div className="h-4 bg-gray-300 rounded w-5/6"></div>
-            <div className="h-4 bg-gray-300 rounded w-4/6"></div>
-          </div>
-
-          {/* Imagem */}
-          <div className="h-64 bg-gray-300 rounded w-full"></div>
+                  <source src={media} type="video/mp4" />
+                  Seu navegador não suporta vídeos.
+                </video>
+              ) : (
+                <Image
+                  key={index}
+                  src={media}
+                  alt=""
+                  width={500}
+                  height={500}
+                  style={{ borderRadius: '8px', objectFit: 'cover', width: '100%', height: 'auto' }}
+                />
+              )
+            )}
+          </Box>
 
           {/* Hashtags */}
-          <div className="flex flex-wrap gap-2 mt-4">
-            <div className="h-6 bg-gray-300 rounded w-20"></div>
-            <div className="h-6 bg-gray-300 rounded w-16"></div>
-            <div className="h-6 bg-gray-300 rounded w-24"></div>
-          </div>
+          <Box display="flex" flexWrap="wrap" gap={1}>
+            {post.hashtags.map((hashtag, index) => (
+              <Button
+                key={index}
+                variant="contained"
+                size="small"
+                color="secondary"
+                href={`/categories/${hashtag.id}`}
+                sx={{ textTransform: 'none', borderRadius: '16px' }}
+              >
+                #{hashtag.name}
+              </Button>
+            ))}
+          </Box>
 
           {/* Links */}
-          <div className="mt-4">
-            <div className="h-4 bg-gray-300 rounded w-32"></div>
-          </div>
+          {post.links.length > 0 && (
+            <Box>
+              <Typography variant="h6" fontWeight="bold">
+                Links Relacionados:
+              </Typography>
+              <ul>
+                {post.links.map((link, index) => (
+                  <li key={index}>
+                    <a href={link} target="_blank" rel="noopener noreferrer" className="text-link">
+                      {link}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </Box>
+          )}
 
-          {/* Código anexo */}
-          <div>
-            <div className="h-6 bg-gray-300 rounded w-1/3 mb-2"></div>
-            <div className="h-48 bg-gray-300 rounded"></div>
-          </div>
-        </div>
+          {/* Código Incorporado */}
+          {post.embedCode && (
+            <Box>
+              <Typography variant="h6" fontWeight="bold">
+                Código Incorporado:
+              </Typography>
+              <Box
+                component="pre"
+                sx={{
+                  backgroundColor: 'grey.900',
+                  color: 'white',
+                  padding: 2,
+                  borderRadius: '8px',
+                  overflowX: 'auto',
+                  mt: 2,
+                }}
+              >
+                <code>{post.embedCode}</code>
+              </Box>
+            </Box>
+          )}
+
+          {/* Comentários */}
+          <Box>
+            <Typography variant="h6" fontWeight="bold">
+              Comentários
+            </Typography>
+            <Divider sx={{ my: 2 }} />
+            <Box display="flex" flexDirection="column" gap={2}>
+              {[1, 2, 3].map((_, index) => (
+                <Card key={index} sx={{ padding: 2, borderRadius: '8px' }}>
+                  <Typography variant="subtitle2" fontWeight="bold">
+                    Usuário {index + 1}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Este é um comentário simulado.
+                  </Typography>
+                </Card>
+              ))}
+            </Box>
+
+            {/* Campo de Novo Comentário */}
+            <TextField
+              fullWidth
+              placeholder="Adicione um comentário..."
+              variant="outlined"
+              multiline
+              rows={3}
+              sx={{ mt: 2 }}
+            />
+            <Button variant="contained" color="primary" sx={{ mt: 2 }}>
+              Enviar
+            </Button>
+          </Box>
+        </Box>
+      ) : (
+        <SkeletonLoader />
       )}
-    </div>
-  )
-}
+    </Box>
+  );
+};
 
-export default PostPage
+const SkeletonLoader = () => (
+  <Box sx={{ padding: 4, margin: '0 auto', maxWidth: 800, display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Skeleton variant="rectangular" height={56} />
+    <Skeleton variant="text" width="60%" />
+    <Skeleton variant="rectangular" height={300} />
+    <Skeleton variant="text" width="80%" />
+    <Skeleton variant="text" width="90%" />
+  </Box>
+);
+
+export default PostPage;

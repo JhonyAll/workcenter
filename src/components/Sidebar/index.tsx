@@ -1,131 +1,153 @@
-// components/Sidebar/index.tsx
-"use client";
-import { useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { IoHome } from "react-icons/io5";
-import { GrProjects, GrUserWorker } from "react-icons/gr";
-import { FaUserCircle, FaCog } from "react-icons/fa";
-import { HiOutlineBell } from "react-icons/hi";
+'use client';
 
-const Sidebar = ({ auxiliarClass = "", isMinimized = false }: { auxiliarClass: string; isMinimized: boolean }) => {
+import { useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import {
+  Box,
+  Drawer,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Divider,
+  IconButton,
+  Typography,
+  Badge,
+} from '@mui/material';
+import {
+  Home as HomeIcon,
+  Work as WorkIcon,
+  Folder as FolderIcon,
+  Notifications as NotificationsIcon,
+  Settings as SettingsIcon,
+  AccountCircle as AccountCircleIcon,
+  Menu as MenuIcon,
+} from '@mui/icons-material';
+
+const Sidebar = ({ isMinimized = false }: { isMinimized: boolean }) => {
   const pathname = usePathname();
-  const [notifications, setNotifications] = useState<number>(0); // Simulando notificações
+  const [notifications] = useState<number>(3); // Simulando notificações
+
+  const items = [
+    { label: 'Início', icon: <HomeIcon />, href: '/' },
+    { label: 'Catálogo', icon: <FolderIcon />, href: '/catalog' },
+    { label: 'Pós-Graduação', icon: <WorkIcon />, href: '/post-graduation' },
+  ];
+
+  const userActions = [
+    { label: 'Ver Perfil', href: '/profile' },
+    { label: 'Configurações', href: '/settings' },
+  ];
+
+  const settings = [
+    { label: 'Configurações da Conta', href: '/account-settings' },
+    { label: 'Preferências', href: '/preferences' },
+  ];
 
   return (
-    <aside
-      className={` shadow-3xl text-white w-60 h-screen z-10 rounded-2xl py-6 ${auxiliarClass} ${
-        isMinimized ? "w-9" : "w-60"
-      } bg-gradient-to-b from-gray-900 via-purple-800 to-black mt-2 transition-all duration-300`}
+    <Drawer
+      variant="permanent"
+      sx={{
+        width: isMinimized ? 80 : 240,
+        flexShrink: 0,
+        [`& .MuiDrawer-paper`]: {
+          width: isMinimized ? 80 : 240,
+          boxSizing: 'border-box',
+          background: 'linear-gradient(to bottom, #1f1f1f, #121212)',
+          color: 'white',
+        },
+      }}
     >
-      <div className={`flex flex-col space-y-4 gap-2 ${isMinimized ? "justify-center items-center" : "pl-4"}`}>
-        {/* Home */}
-        <Link
-          href="/"
-          className={`flex items-center space-x-2 ${pathname === "/" ? "text-purple-500" : "text-white"} text-lg hover:text-purple-500 transition-colors`}
-        >
-          <IoHome size={24} />
-          {!isMinimized && <span className="text-sm">Início</span>}
-        </Link>
+      <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        {/* Menu Icon */}
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
+          <IconButton>
+            <MenuIcon sx={{ color: 'white' }} />
+          </IconButton>
+        </Box>
 
-        {/* Catalog */}
-        <Link
-          href="/catalog"
-          className={`flex items-center space-x-2 ${pathname === "/catalog" ? "text-purple-500" : "text-white"} text-lg hover:text-purple-500 transition-colors`}
-        >
-          <GrProjects size={24} />
-          {!isMinimized && <span className="text-sm">Catálogo</span>}
-        </Link>
+        {/* Menu Principal */}
+        <List>
+          {items.map((item) => (
+            <ListItemButton
+              key={item.href}
+              component={Link}
+              href={item.href}
+              selected={pathname === item.href}
+              sx={{
+                px: 2,
+                color: pathname === item.href ? 'purple' : 'white',
+                '&:hover': { color: 'purple' },
+              }}
+            >
+              <ListItemIcon sx={{ color: 'inherit' }}>{item.icon}</ListItemIcon>
+              {!isMinimized && <ListItemText primary={item.label} />}
+            </ListItemButton>
+          ))}
+        </List>
 
-        {/* Post-Graduation */}
-        <Link
-          href="/post-graduation"
-          className={`flex items-center space-x-2 ${pathname === "/post-graduation" ? "text-purple-500" : "text-white"} text-lg hover:text-purple-500 transition-colors`}
-        >
-          <GrUserWorker size={24} />
-          {!isMinimized && <span className="text-sm">Pós-Graduação</span>}
-        </Link>
+        <Divider sx={{ borderColor: 'gray' }} />
 
-        {/* Seção de Usuario */}
-        <div className="mt-6 border-t border-gray-700 pt-4">
-          <div className="flex items-center space-x-2">
-            <FaUserCircle size={30} className="text-gray-300" />
-            {!isMinimized && <span className="text-sm">Perfil do Usuário</span>}
-          </div>
-          {!isMinimized && (
-            <ul className="mt-2 space-y-2 text-xs text-gray-400">
-              <li>
-                <Link
-                  href="/profile"
-                  className="hover:text-purple-500 transition-colors"
-                >
-                  Ver Perfil
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/settings"
-                  className="hover:text-purple-500 transition-colors"
-                >
-                  Configurações
-                </Link>
-              </li>
-            </ul>
-          )}
-        </div>
+        {/* Perfil */}
+        <Box sx={{ px: 2, py: 1 }}>
+          <Typography variant="body1" sx={{ display: isMinimized ? 'none' : 'block', mb: 1 }}>
+            Perfil do Usuário
+          </Typography>
+          <List>
+            {userActions.map((action) => (
+              <ListItemButton
+                key={action.href}
+                component={Link}
+                href={action.href}
+                sx={{
+                  px: 2,
+                  color: 'gray',
+                  '&:hover': { color: 'purple' },
+                }}
+              >
+                {!isMinimized && <ListItemText primary={action.label} />}
+              </ListItemButton>
+            ))}
+          </List>
+        </Box>
 
         {/* Notificações */}
-        <div className="mt-6">
-          <div className="flex items-center space-x-2">
-            <HiOutlineBell size={24} className="text-gray-300" />
-            {!isMinimized && <span className="text-sm">Notificações</span>}
-            {notifications > 0 && !isMinimized && (
-              <span className="bg-red-600 text-white rounded-full px-2 py-1 text-xs absolute top-2 right-2">
-                {notifications}
-              </span>
-            )}
-          </div>
-          {!isMinimized && (
-            <ul className="mt-2 space-y-2 text-xs text-gray-400">
-              <li>
-                <span className="hover:text-purple-500 transition-colors">Nova mensagem de cliente</span>
-              </li>
-              <li>
-                <span className="hover:text-purple-500 transition-colors">Nova candidatura a projeto</span>
-              </li>
-            </ul>
-          )}
-        </div>
+        <ListItemButton sx={{ px: 2, mt: 2, color: 'white' }}>
+          <ListItemIcon>
+            <Badge badgeContent={notifications} color="error">
+              <NotificationsIcon sx={{ color: 'inherit' }} />
+            </Badge>
+          </ListItemIcon>
+          {!isMinimized && <ListItemText primary="Notificações" />}
+        </ListItemButton>
+
+        <Divider sx={{ borderColor: 'gray', mt: 'auto' }} />
 
         {/* Configurações */}
-        <div className="mt-6 border-t border-gray-700 pt-4">
-          <div className="flex items-center space-x-2">
-            <FaCog size={24} className="text-gray-300" />
-            {!isMinimized && <span className="text-sm">Configurações</span>}
-          </div>
-          {!isMinimized && (
-            <ul className="mt-2 space-y-2 text-xs text-gray-400">
-              <li>
-                <Link
-                  href="/account-settings"
-                  className="hover:text-purple-500 transition-colors"
-                >
-                  Configurações da Conta
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/preferences"
-                  className="hover:text-purple-500 transition-colors"
-                >
-                  Preferências
-                </Link>
-              </li>
-            </ul>
-          )}
-        </div>
-      </div>
-    </aside>
+        <Box sx={{ px: 2, py: 1 }}>
+          <Typography variant="body1" sx={{ display: isMinimized ? 'none' : 'block', mb: 1 }}>
+            Configurações
+          </Typography>
+          <List>
+            {settings.map((setting) => (
+              <ListItemButton
+                key={setting.href}
+                component={Link}
+                href={setting.href}
+                sx={{
+                  px: 2,
+                  color: 'gray',
+                  '&:hover': { color: 'purple' },
+                }}
+              >
+                {!isMinimized && <ListItemText primary={setting.label} />}
+              </ListItemButton>
+            ))}
+          </List>
+        </Box>
+      </Box>
+    </Drawer>
   );
 };
 

@@ -28,6 +28,11 @@ export async function GET(req: NextRequest) {
       type: true,
       createdAt: true,
       updatedAt: true,
+      WorkerProfile: {
+        include: {
+          skills: true
+        }
+      }
     },
   });
 
