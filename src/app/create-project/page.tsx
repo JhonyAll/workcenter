@@ -4,6 +4,7 @@ import { useUser } from "@/context/UserContext";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { IoIosClose, IoMdAdd } from "react-icons/io";
+import { Button, TextField, Grid, Box, Typography, Chip, IconButton, Select, MenuItem, InputLabel, FormControl } from "@mui/material";
 
 const CreateProjectPage = () => {
   const [title, setTitle] = useState<string>("");
@@ -14,8 +15,8 @@ const CreateProjectPage = () => {
   const [hashtags, setHashtags] = useState<string[]>([]);
   const [newHashtag, setNewHashtag] = useState<string>("");
 
-  const {user} = useUser()
-  const router = useRouter()
+  const { user } = useUser();
+  const router = useRouter();
 
   const handleAddHashtag = () => {
     if (newHashtag.trim() && !hashtags.includes(newHashtag)) {
@@ -35,14 +36,14 @@ const CreateProjectPage = () => {
       budget: budgetType === "negotiable" ? "A negociar" : budgetValue,
       deadline,
       hashtags,
-      userId: user?.id
+      userId: user?.id,
     };
 
     try {
-      const response = await fetch('/api/project', {
-        method: 'POST',
+      const response = await fetch("/api/project", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
       });
@@ -50,153 +51,165 @@ const CreateProjectPage = () => {
       const result = await response.json();
 
       if (response.ok) {
-        router.push('/')
+        router.push("/");
       } else {
         alert(result.message);
       }
     } catch (error) {
-      console.error('Erro ao criar usuário:', error);
-      alert('Erro ao criar usuário. Tente novamente.');
+      console.error("Erro ao criar o projeto:", error);
+      alert("Erro ao criar o projeto. Tente novamente.");
     }
   };
 
   return (
-    <div className="min-h-screen flex bg-[#0A0A0A] text-white p-6 gap-6">
+    <Box className="min-h-screen flex bg-[#0A0A0A] text-white p-6 gap-6">
       {/* Formulário */}
-      <div className="p-6 lg:h-[500px] w-full lg:w-1/2 bg-gradient-to-b from-gray-900 via-purple-800 to-black rounded-2xl">
-        <h1 className="text-3xl font-bold mb-6">Criar Projeto</h1>
-        <div className="space-y-4 p-2 lg:scroll-y-auto lg:overflow-y-auto h-5/6">
-          {/* Título */}
-          <input
-            type="text"
-            placeholder="Título do Projeto"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-purple-400"
-          />
-
-          {/* Descrição */}
-          <textarea
-            placeholder="Descrição do projeto..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={4}
-            className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-purple-400"
-          />
-
-          {/* Tipo de Orçamento */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Orçamento</h3>
-            <select
-              value={budgetType}
-              onChange={(e) => setBudgetType(e.target.value)}
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-purple-400"
-            >
-              <option value="negotiable">A negociar</option>
-              <option value="total">Especificar orçamento</option>
-            </select>
-            {budgetType !== "negotiable" && (
-              <input
-                type="number"
-                placeholder="Valor do orçamento"
-                value={budgetValue}
-                onChange={(e) => setBudgetValue(e.target.value)}
-                className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-purple-400"
-              />
-            )}
-          </div>
-
-          {/* Prazo */}
-          <div>
-            <h3 className="text-lg font-semibold">Prazo</h3>
-            <input
-              type="date"
-              value={deadline}
-              onChange={(e) => setDeadline(e.target.value)}
-              className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg focus:ring-2 focus:ring-purple-400"
+      <Grid container sx={{ paddingX: 8, gap: "8px", justifyContent: "space-between" }}>
+        <Grid item xs={12} lg={6} className="lg:max-h-[500px] bg-[#1e1e1e] lg:overflow-y-auto lg:scroll-y-auto rounded p-6">
+          <Typography variant="h4" component="h1" gutterBottom fontWeight={700}>
+            Criar Projeto
+          </Typography>
+          <Box className="space-y-4">
+            <TextField
+              label="Título do Projeto"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              fullWidth
+              variant="outlined"
+              InputProps={{
+                style: { backgroundColor: "#333333", color: "white" },
+              }}
             />
-          </div>
 
-          {/* Hashtags */}
-          <div>
-            <h3 className="text-lg font-semibold">Categorias (Hashtags)</h3>
-            <div className="flex items-center gap-2 mt-2">
-              <input
-                type="text"
-                placeholder="Adicionar hashtag"
-                value={newHashtag}
-                onChange={(e) => setNewHashtag(e.target.value)}
-                className="flex-1 bg-gray-800 text-white px-4 py-2 rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-purple-400"
+            <TextField
+              label="Descrição"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              fullWidth
+              variant="outlined"
+              multiline
+              rows={4}
+              InputProps={{
+                style: { backgroundColor: "#333333", color: "white" },
+              }}
+            />
+
+            {/* Orçamento */}
+            <Box>
+              <Typography variant="h6" mb={1}>Orçamento</Typography>
+              <FormControl fullWidth>
+                <InputLabel>Tipo de Orçamento</InputLabel>
+                <Select
+                  value={budgetType}
+                  onChange={(e) => setBudgetType(e.target.value)}
+                  label="Tipo de Orçamento"
+                  sx={{ backgroundColor: "#333333", color: "white", marginBottom: 2 }}
+                >
+                  <MenuItem value="negotiable">A negociar</MenuItem>
+                  <MenuItem value="total">Especificar orçamento</MenuItem>
+                </Select>
+              </FormControl>
+
+              {budgetType !== "negotiable" && (
+                <TextField
+                  label="Valor do Orçamento"
+                  value={budgetValue}
+                  type="number"
+                  onChange={(e) => setBudgetValue(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  InputProps={{
+                    style: { backgroundColor: "#333333", color: "white" },
+                  }}
+                />
+              )}
+            </Box>
+
+            {/* Prazo */}
+            <Box>
+              <Typography variant="h6">Prazo</Typography>
+              <TextField
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                fullWidth
+                variant="outlined"
+                InputProps={{
+                  style: { backgroundColor: "#333333", color: "white" },
+                }}
               />
-              <button
-                onClick={handleAddHashtag}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-500"
+            </Box>
+
+            {/* Hashtags */}
+            <Box>
+              <Typography variant="h6">Categorias (Hashtags)</Typography>
+              <Box className="flex items-center space-x-2">
+                <TextField
+                  label="Adicionar hashtag"
+                  value={newHashtag}
+                  onChange={(e) => setNewHashtag(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  InputProps={{
+                    style: { backgroundColor: "#333333", color: "white" },
+                  }}
+                />
+                <Button variant="contained" color="secondary" onClick={handleAddHashtag}>
+                  <IoMdAdd />
+                </Button>
+              </Box>
+
+              <Box className="flex flex-wrap mt-2 gap-2">
+                {hashtags.map((hashtag, idx) => (
+                  <Chip
+                    key={idx}
+                    label={`#${hashtag}`}
+                    clickable
+                    color="primary"
+                    onDelete={() => handleRemoveHashtag(hashtag)}
+                  />
+                ))}
+              </Box>
+            </Box>
+
+            <Box className="mt-4">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handlePublishProject}
+                sx={{ width: "100%" }}
               >
-                <IoMdAdd />
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2 mt-4">
-              {hashtags.map((hashtag, idx) => (
-                <div
-                  key={idx}
-                  className="bg-purple-600 text-white px-3 py-1 rounded-lg flex items-center gap-2"
-                >
-                  #{hashtag}
-                  <button
-                    onClick={() => handleRemoveHashtag(hashtag)}
-                    className="text-red-400 hover:text-red-600"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
+                Publicar Projeto
+              </Button>
+            </Box>
+          </Box>
+        </Grid>
 
-          {/* Preview */}
-          <button
-            onClick={handlePublishProject}
-            className="w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-500"
-          >
-            Publicar Projeto
-          </button>
-        </div>
-      </div>
-
-      {/* Preview */}
-      <div className="p-6 hidden lg:block lg:w-1/2 h-[500px] bg-gradient-to-b from-gray-900 via-purple-800 to-black rounded-2xl">
-        <h2 className="text-2xl font-bold mb-4">Preview do Projeto</h2>
-        <div className="p-4 bg-gray-900 rounded-2xl w-full">
-
-          <div className="space-y-4">
-            <h3 className="text-xl font-semibold">{title || "Título do Projeto"}</h3>
-            <p className="text-gray-400">{description || "Descrição do projeto aparecerá aqui."}</p>
-            <p className="text-gray-300">
-              <span className="font-semibold">Orçamento:</span>{" "}
-              {budgetType === "negotiable"
-                ? "A negociar"
-                : budgetValue
-                  ? `R$ ${budgetValue}`
-                  : "Não especificado"}
-            </p>
-            <p className="text-gray-300">
-              <span className="font-semibold">Prazo:</span>{" "}
-              {deadline || "Não especificado"}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {hashtags.map((hashtag, idx) => (
-                <span
-                  key={idx}
-                  className="bg-purple-600 text-white px-3 py-1 rounded-lg"
-                >
-                  #{hashtag}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+        {/* Preview */}
+        <Grid item xs={12} lg={5}>
+          <Box className="min-h-[500px] bg-[#1e1e1e] p-6 rounded">
+            <Typography variant="h4" color="primary" fontWeight={700} gutterBottom>
+              Preview do Projeto
+            </Typography>
+            <Box>
+              <Typography variant="h5" color="primary" fontWeight={600}>{title || "Título do Projeto"}</Typography>
+              <Typography variant="body1" color="textSecondary" paragraph>{description || "Descrição do projeto."}</Typography>
+              <Typography variant="body1" color="textSecondary">
+                <strong>Orçamento:</strong> {budgetType === "negotiable" ? "A negociar" : "R$ " + budgetValue || "Não especificado"}
+              </Typography>
+              <Typography variant="body1" color="textSecondary">
+                <strong>Prazo:</strong> {deadline || "Não especificado"}
+              </Typography>
+              <Box display="flex" flexWrap="wrap" mt={2}>
+                {hashtags.map((hashtag, idx) => (
+                  <Chip key={idx} label={`#${hashtag}`} color="primary" sx={{ marginRight: 1 }} />
+                ))}
+              </Box>
+            </Box>
+          </Box>
+        </Grid>
+      </Grid>
+    </Box>
   );
 };
 

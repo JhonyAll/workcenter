@@ -5,6 +5,7 @@ import handleUpload from "@/utils/uploadForFirebase";
 import { useState } from "react";
 import { IoIosClose } from "react-icons/io";
 import { useRouter } from "next/navigation";
+import { Button, TextField, Grid, Chip, Box, Typography, IconButton } from "@mui/material";
 
 const CreatePostPage = () => {
   const [title, setTitle] = useState("");
@@ -15,20 +16,16 @@ const CreatePostPage = () => {
   const [codeSnippet, setCodeSnippet] = useState("");
   const [links, setLinks] = useState<string[]>([]);
   const [newLink, setNewLink] = useState("");
-  const [preview, setPreview] = useState(false)
+  const [preview, setPreview] = useState(false);
 
-  const { user } = useUser()
-  const router = useRouter()
+  const { user } = useUser();
+  const router = useRouter();
 
   const handleMultipleUploads = async (files: File[]) => {
     try {
-      // Mapeia os arquivos para chamadas da função handleUpload
       const uploadPromises = files.map((file) => handleUpload(file));
-
-      // Aguarda o upload de todos os arquivos
       const downloadURLs = await Promise.all(uploadPromises);
-
-      return downloadURLs; // Retorna as URLs de download
+      return downloadURLs;
     } catch (error) {
       console.error("Erro durante o upload de arquivos:", error);
       throw error;
@@ -36,22 +33,21 @@ const CreatePostPage = () => {
   };
 
   const handlePublishPost = async () => {
-
     const body = {
-      "title": title,
-      "description": description,
-      "gallery": await handleMultipleUploads(media),
-      "links": links,
-      "hashtags": categories,
-      "codeSnippet": codeSnippet,
-      "userId": user?.id
+      title,
+      description,
+      gallery: await handleMultipleUploads(media),
+      links,
+      hashtags: categories,
+      codeSnippet,
+      userId: user?.id,
     };
 
     try {
-      const response = await fetch('/api/posts', {
-        method: 'POST',
+      const response = await fetch("/api/posts", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(body),
       });
@@ -59,19 +55,19 @@ const CreatePostPage = () => {
       const result = await response.json();
 
       if (response.ok) {
-        router.push('/')
+        router.push("/");
       } else {
         alert(result.message);
       }
     } catch (error) {
-      console.error('Erro ao criar usuário:', error);
-      alert('Erro ao criar usuário. Tente novamente.');
+      console.error("Erro ao criar o post:", error);
+      alert("Erro ao criar o post. Tente novamente.");
     }
-  }
+  };
 
   const handleViewPreview = () => {
-    setPreview(!preview)
-  }
+    setPreview(!preview);
+  };
 
   const handleAddLink = () => {
     if (newLink.trim() && !links.includes(newLink)) {
@@ -111,212 +107,199 @@ const CreatePostPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#0A0A0A] text-white p-4 pb-40 gap-10">
-      {/* Editor */}
-      <div className="lg:w-1/2 w-full lg:h-[500px] p-8 bg-gradient-to-b from-gray-900 via-purple-800 to-black rounded-2xl">
-        <h1 className="text-3xl font-bold mb-6">Criar Post</h1>
-        <div className="space-y-6 lg:scroll-y-auto lg:overflow-y-auto h-5/6 pr-2">
-          {/* Título */}
-          <input
-            type="text"
-            placeholder="Título do Post"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-purple-400"
-          />
+    <Box className="min-h-screen max-w-screen text-white p-6">
+      <Grid container sx={{ paddingX: 8,gap: '8px', justifyContent: 'space-between' }}>
+        {/* Editor */}
+        <Grid item xs={12} lg={6} className="lg:max-h-[500px] lg:overflow-y-auto lg:scroll-y-auto bg-[#1e1e1e] rounded p-6">
+          <Typography variant="h4" component="h1" gutterBottom fontWeight={700}>
+            Criar Post
+          </Typography>
 
-          {/* Descrição */}
-          <textarea
-            placeholder="Escreva uma descrição..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={4}
-            className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-purple-400"
-          />
-
-          {/* {Links } */}
-          {/* Links */}
-          <div>
-            <h3 className="text-lg font-semibold">Links</h3>
-            <div className="flex items-center mt-2 space-x-2">
-              <input
-                type="text"
-                placeholder="Adicionar link (ex: https://meusite.com)"
-                value={newLink}
-                onChange={(e) => setNewLink(e.target.value)}
-                className="flex-1 bg-gray-800 text-white px-4 py-2 rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-purple-400"
-              />
-              <button
-                onClick={handleAddLink}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-500"
-              >
-                Adicionar
-              </button>
-            </div>
-            <div className="flex flex-wrap mt-4 gap-2">
-              {links.map((link, idx) => (
-                <div
-                  key={idx}
-                  className="bg-gray-800 text-purple-400 px-3 py-1 rounded-lg flex items-center gap-2"
-                >
-                  <a href={link} target="_blank" rel="noopener noreferrer">
-                    {link}
-                  </a>
-                  <button
-                    onClick={() => handleRemoveLink(link)}
-                    className="text-red-400 hover:text-red-600"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Categorias */}
-          <div>
-            <h3 className="text-lg font-semibold">Categorias (Hashtags)</h3>
-            <div className="flex items-center mt-2 space-x-2">
-              <input
-                type="text"
-                placeholder="Adicionar categoria"
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                className="flex-1 bg-gray-800 text-white px-4 py-2 rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-purple-400"
-              />
-              <button
-                onClick={handleAddCategory}
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-500"
-              >
-                Adicionar
-              </button>
-            </div>
-            <div className="flex flex-wrap mt-4 gap-2">
-              {categories.map((category, idx) => (
-                <span
-                  key={idx}
-                  className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm cursor-pointer hover:bg-purple-500"
-                  onClick={() => handleRemoveCategory(category)}
-                >
-                  #{category}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Upload de Mídia */}
-          <div>
-            <h3 className="text-lg font-semibold">Imagens e Vídeos</h3>
-            <div
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              className="border-2 border-dashed border-purple-400 rounded-lg p-6 text-center hover:border-purple-300"
-            >
-              <p className="text-gray-400">Arraste e solte arquivos aqui ou clique abaixo</p>
-              <input
-                type="file"
-                multiple
-                accept="image/*,video/*"
-                onChange={(e) => handleMediaUpload(e.target.files)}
-                className="mt-4 text-purple-400"
-              />
-            </div>
-          </div>
-
-          {/* Código Incorporado */}
-          <div>
-            <h3 className="text-lg font-semibold">Código Incorporado</h3>
-            <textarea
-              placeholder="<Seu código aqui>"
-              value={codeSnippet}
-              onChange={(e) => setCodeSnippet(e.target.value)}
-              rows={4}
-              className="w-full bg-gray-800 text-white px-4 py-3 rounded-lg placeholder-gray-400 focus:ring-2 focus:ring-purple-400"
+          <Box className="space-y-4">
+            <TextField
+              label="Título do Post"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              fullWidth
+              variant="outlined"
+              InputProps={{
+                style: { backgroundColor: "#333333", color: "white" },
+              }}
             />
-          </div>
-          <div>
-            <button
-              onClick={handleViewPreview}
-              className="block mb-4 lg:hidden bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-500"
-            >
-              Visualizar Preview
-            </button>
-            <button
-              onClick={handlePublishPost}
-              className="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-500"
-            >
-              Publicar Post
-            </button>
-          </div>
-        </div>
-      </div>
 
-      {/* Preview */}
-      <div className={`lg:w-1/2 min-h-[500px] p-6 bg-gradient-to-b from-gray-900 via-purple-800 to-gray-900 rounded-2xl lg:block ${preview ? ' w-5/6 absolute top-[60%] z-20 left-[50%] shadow-3xl translate-y-[-50%] translate-x-[-50%] border border-white' : 'hidden'}`}>
-        <div className="flex justify-between">
-          <h1 className="text-3xl font-bold mb-6 text-purple-400">Preview</h1>
-          <button className="text-3xl font-bold mb-6 text-purple-400 lg:hidden" onClick={handleViewPreview}><IoIosClose size={40} /></button>
-        </div>
-        <div className="space-y-6 p-4 bg-gray-900 rounded-lg">
-          <h1 className="text-3xl font-bold text-purple-400">{title || "Título do Post"}</h1>
-          <p className="mt-4 text-justify break-words whitespace-pre-wrap">{description || "Adicione uma descrição..."}</p>
+            <TextField
+              label="Descrição"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              fullWidth
+              variant="outlined"
+              multiline
+              rows={4}
+              InputProps={{
+                style: { backgroundColor: "#333333", color: "white" },
+              }}
+            />
 
-          {links.length > 0 && (
-            <div className="mt-4">
-              <h3 className="text-lg font-semibold text-purple-400">Links</h3>
-              <ul className="list-disc list-inside">
-                {links.map((link, idx) => (
-                  <li key={idx}>
-                    <a href={link} target="_blank" rel="noopener noreferrer" className="text-purple-300 underline">
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {categories.length > 0 && (
-            <div className="flex flex-wrap mt-4 gap-2">
-              {categories.map((category, idx) => (
-                <span
-                  key={idx}
-                  className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm"
+            <Box>
+              <Typography variant="h6">Links</Typography>
+              <Box className="flex items-center space-x-2">
+                <TextField
+                  label="Adicionar link (ex: https://meusite.com)"
+                  value={newLink}
+                  onChange={(e) => setNewLink(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  InputProps={{
+                    style: { backgroundColor: "#333333", color: "white" },
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={handleAddLink}
+                  sx={{ padding: "8px 16px" }}
                 >
-                  #{category}
-                </span>
-              ))}
-            </div>
-          )}
-          {media.length > 0 && (
-            <div className="mt-4 grid grid-cols-3 gap-4">
-              {media.map((file, idx) => (
-                <div key={idx} className="relative">
-                  {file.type.startsWith("image/") ? (
-                    <img
-                      src={URL.createObjectURL(file)}
-                      alt={`media-${idx}`}
-                      className="rounded-lg w-full h-32 object-cover"
-                    />
-                  ) : (
-                    <video
-                      src={URL.createObjectURL(file)}
-                      controls
-                      className="rounded-lg w-full h-32 object-cover"
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-          {codeSnippet && (
-            <pre className="mt-4 bg-gray-800 p-4 rounded-lg overflow-auto">
-              <code>{codeSnippet}</code>
-            </pre>
-          )}
-        </div>
-      </div>
-    </div>
+                  Adicionar
+                </Button>
+              </Box>
+
+              <Box className="flex flex-wrap mt-2 gap-2">
+                {links.map((link, idx) => (
+                  <Chip
+                    key={idx}
+                    label={link}
+                    clickable
+                    color="primary"
+                    onDelete={() => handleRemoveLink(link)}
+                  />
+                ))}
+              </Box>
+            </Box>
+
+            <Box>
+              <Typography variant="h6">Categorias (Hashtags)</Typography>
+              <Box className="flex items-center space-x-2">
+                <TextField
+                  label="Adicionar categoria"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  fullWidth
+                  variant="outlined"
+                  InputProps={{
+                    style: { backgroundColor: "#333333", color: "white" },
+                  }}
+                />
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={handleAddCategory}
+                  sx={{ padding: "8px 16px" }}
+                >
+                  Adicionar
+                </Button>
+              </Box>
+
+              <Box className="flex flex-wrap mt-2 gap-2">
+                {categories.map((category, idx) => (
+                  <Chip
+                    key={idx}
+                    label={`#${category}`}
+                    clickable
+                    color="primary"
+                    onDelete={() => handleRemoveCategory(category)}
+                  />
+                ))}
+              </Box>
+            </Box>
+
+            <Box>
+              <Typography variant="h6">Imagens e Vídeos</Typography>
+              <Box
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                className="border-2 border-dashed border-purple-400 rounded-lg p-4 text-center hover:border-purple-300"
+              >
+                <Typography variant="body2" color="textSecondary">
+                  Arraste e solte arquivos aqui ou clique abaixo
+                </Typography>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*,video/*"
+                  onChange={(e) => handleMediaUpload(e.target.files)}
+                  className="mt-4"
+                />
+              </Box>
+            </Box>
+
+            <Box>
+              <Typography variant="h6">Código Incorporado</Typography>
+              <TextField
+                label="Seu código aqui"
+                value={codeSnippet}
+                onChange={(e) => setCodeSnippet(e.target.value)}
+                fullWidth
+                variant="outlined"
+                multiline
+                rows={4}
+                InputProps={{
+                  style: { backgroundColor: "#333333", color: "white" },
+                }}
+              />
+            </Box>
+
+            <Box className="mt-4">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleViewPreview}
+                sx={{ width: "100%" }}
+              >
+                Visualizar Preview
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={handlePublishPost}
+                sx={{ width: "100%", mt: 2 }}
+              >
+                Publicar Post
+              </Button>
+            </Box>
+          </Box>
+        </Grid>
+
+        {/* Preview */}
+        <Grid item xs={12} lg={5}>
+          <Box
+            className={`min-h-[500px] p-6 bg-[#1e1e1e] rounded ${preview ? "block" : "hidden"}`}
+          >
+            <Box display="flex" justifyContent="space-between" mb={4}>
+              <Typography variant="h4" color="primary" fontWeight={700}>
+                Preview
+              </Typography>
+              <IconButton color="primary" onClick={handleViewPreview}>
+                <IoIosClose size={30} />
+              </IconButton>
+            </Box>
+
+            <Box>
+              <Typography variant="h5" color="primary">
+                {title || "Título do Post"}
+              </Typography>
+              <Typography variant="body1" color="textSecondary" paragraph>
+                {description || "Descrição do post."}
+              </Typography>
+              <Box display="flex" flexWrap="wrap">
+                {categories.map((category) => (
+                  <Chip label={`#${category}`} key={category} color="primary" className="mr-2" />
+                ))}
+              </Box>
+            </Box>
+          </Box>
+        </Grid>
+      </Grid>
+    </Box>
   );
 };
 

@@ -169,7 +169,8 @@ export default function SignUpBox() {
             setErrors(currentErrors);
         }
 
-        return Object.keys(currentErrors).length === 0; // Passa para o próximo apenas se não houver erros
+        if (currentErrors.confirmPassword === '' && currentErrors.password === '' && currentErrors.name === '' && currentErrors.email === '' && currentErrors.username === '') { return true }
+        return false
     };
 
     const handleAddSkill = () => {

@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import { AiOutlinePhone, AiOutlineMail, AiOutlineInstagram, AiOutlineLinkedin } from "react-icons/ai";
 import { BsChatText, BsFillStarFill } from "react-icons/bs";
+import { IoMdSettings } from "react-icons/io";
 
 const WorkerProfilePage = () => {
   const { user, isLoading } = useUser(); // Considerando que isLoading já está implementado no contexto
@@ -79,7 +80,7 @@ const WorkerProfilePage = () => {
           variant="contained"
           color="primary"
           onClick={() => alert("Abrindo chat com " + user.name)}
-          startIcon={<BsChatText size={24} />}
+          startIcon={<IoMdSettings  size={24} />}
           sx={{
             textTransform: "none", // Remove a capitalização automática
             fontWeight: "bold",
@@ -92,7 +93,7 @@ const WorkerProfilePage = () => {
             },
           }}
         >
-          Enviar Mensagem
+          Editar Perfil
         </Button>
       </Box>
 

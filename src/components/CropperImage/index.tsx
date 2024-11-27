@@ -72,7 +72,7 @@ const ImageCropper = ({
             sx={{ width: 100, height: 100 }}
           />
         ) : (
-          <FaUserCircle size={200} color="#cccccc" />
+          <FaUserCircle size={100} color="#cccccc" />
         )}
       </IconButton>
       <input
