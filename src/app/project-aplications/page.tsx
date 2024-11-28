@@ -26,21 +26,35 @@ type ApplicationWithRelations = Prisma.ApplicationGetPayload<{
     };
 }>;
 
+type ProjectWithApplications = Prisma.ProjectGetPayload<{
+    include: {
+        applications: {
+            include: {
+                worker: {
+                    select: {
+                        id: true;
+                        username: true;
+                        profilePhoto: true;
+                    };
+                };
+            };
+        };
+    };
+}>;
+
 const ApplicationsToMePage = () => {
-    const [applications, setApplications] = useState<ApplicationWithRelations[] | null>(null);
+    const [applications, setApplications] = useState<ApplicationWithRelations[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const router = useRouter()
-    const { user } = useUser()
+    const router = useRouter();
+    const { user } = useUser();
 
     const fetchApplications = async () => {
         try {
             const response = await fetch('/api/projects/applications', { credentials: 'include' });
             const data = await response.json();
-            let application = []
-            data.data.map((d) => { if (d.applications.length) { application.push(d.applications[0]) } })
-            console.log(application)
-            setApplications(application);
+            const applications: ApplicationWithRelations[] = data.data.flatMap((project: ProjectWithApplications) => project.applications);
+            setApplications(applications);
         } catch (error) {
             console.error('Erro ao carregar aplicações:', error);
         } finally {
@@ -49,20 +63,17 @@ const ApplicationsToMePage = () => {
     };
 
     // Função de contato (para envio de mensagem ou interação)
-    const handleContact = async () => {
+    const handleContact = async (workerId: string) => {
         if (user) {
-            // Verifica se já existe um chat entre o usuário logado e o trabalhador
             const response = await fetch(`/api/chat`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    user2Id: user?.id,
+                    user2Id: workerId,
                 }),
             });
 
             const result = await response.json();
-
-            // Redireciona para o chat existente ou recém-criado
             router.push(`/chat/${result.data.chatId}`);
         }
     };
@@ -88,7 +99,7 @@ const ApplicationsToMePage = () => {
                                 </Card>
                             </Grid>
                         ))
-                        : applications?.map((application) => (
+                        : applications.map((application) => (
                             <Grid item xs={12} sm={6} md={4} key={application.id}>
                                 <Card sx={{ backgroundColor: '#2c2c2c', padding: 3, height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: 3 }}>
                                     <Box>
@@ -122,18 +133,18 @@ const ApplicationsToMePage = () => {
                                     <Button
                                         variant="contained"
                                         color="primary"
-                                        onClick={handleContact}
+                                        onClick={() => handleContact(application.worker.id)}
                                         startIcon={<BsChatText size={24} />}
                                         sx={{
-                                            textTransform: "none", // Remove a capitalização automática
+                                            textTransform: "none",
                                             fontWeight: "bold",
                                             fontSize: "1rem",
                                             marginTop: '4px',
-                                            padding: "8px 16px", // Espaçamento interno,
+                                            padding: "8px 16px",
                                             marginBottom: '8px',
-                                            gap: 1.5, // Espaço entre o ícone e o texto
+                                            gap: 1.5,
                                             '&:hover': {
-                                                backgroundColor: "rgba(103, 58, 183, 0.85)", // Customiza o hover
+                                                backgroundColor: "rgba(103, 58, 183, 0.85)",
                                             },
                                         }}
                                     >
@@ -142,7 +153,11 @@ const ApplicationsToMePage = () => {
                                 </Card>
                             </Grid>
                         ))}
-                    {!loading && applications && !applications[0] && <Typography variant="h5" className='m-10'>Nenhuma aplicação recebida por enquanto.</Typography>}
+                    {!loading && applications.length === 0 && (
+                        <Typography variant="h5" className='m-10'>
+                            Nenhuma aplicação recebida por enquanto.
+                        </Typography>
+                    )}
                 </Grid>
             </Box>
         </Box>
