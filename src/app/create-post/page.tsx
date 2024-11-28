@@ -16,7 +16,7 @@ const CreatePostPage = () => {
   const [codeSnippet, setCodeSnippet] = useState("");
   const [links, setLinks] = useState<string[]>([]);
   const [newLink, setNewLink] = useState("");
-  const [preview, setPreview] = useState(false);
+  const [preview, setPreview] = useState(true);
 
   const { user } = useUser();
   const router = useRouter();
@@ -108,7 +108,7 @@ const CreatePostPage = () => {
 
   return (
     <Box className="min-h-screen max-w-screen text-white p-6">
-      <Grid container sx={{ paddingX: 8,gap: '8px', justifyContent: 'space-between' }}>
+      <Grid container sx={{ paddingX: {sm: 0, md: 8},gap: '8px', justifyContent: 'space-between' }}>
         {/* Editor */}
         <Grid item xs={12} lg={6} className="lg:max-h-[500px] lg:overflow-y-auto lg:scroll-y-auto bg-[#1e1e1e] rounded p-6">
           <Typography variant="h4" component="h1" gutterBottom fontWeight={700}>

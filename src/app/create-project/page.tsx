@@ -64,7 +64,7 @@ const CreateProjectPage = () => {
   return (
     <Box className="min-h-screen flex bg-[#0A0A0A] text-white p-6 gap-6">
       {/* Formulário */}
-      <Grid container sx={{ paddingX: 8, gap: "8px", justifyContent: "space-between" }}>
+      <Grid container sx={{ paddingX: {sm: 0, md: 8}, gap: "8px", justifyContent: "space-between" }}>
         <Grid item xs={12} lg={6} className="lg:max-h-[500px] bg-[#1e1e1e] lg:overflow-y-auto lg:scroll-y-auto rounded p-6">
           <Typography variant="h4" component="h1" gutterBottom fontWeight={700}>
             Criar Projeto
