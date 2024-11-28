@@ -1,28 +1,10 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import type { Prisma } from '@prisma/client';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Box, Typography, Button, Avatar, Card, Skeleton, TextField, Divider } from '@mui/material';
-import { FaUserCircle } from 'react-icons/fa';
-
-type PostWithRelations = Prisma.PostGetPayload<{
-  include: {
-    hashtags: true;
-    author: {
-      select: {
-        id: true;
-        username: true;
-        profilePhoto: true;
-      };
-    };
-  };
-}>;
+'use client'; import { useEffect, useState } from 'react'; import type { Prisma } from '@prisma/client'; import Image from 'next/image'; import Link from 'next/link'; import { Box, Typography, Button, Avatar, Card, Skeleton, TextField, Divider } from '@mui/material'; import { FaUserCircle } from 'react-icons/fa'; type PostWithRelations = Prisma.PostGetPayload<{ include: { hashtags: true; author: { select: { id: true; username: true; profilePhoto: true; }; }; comments: { include: { author: { select: { id: true; username: true; profilePhoto: true; }; }; }; }; }; }>;
 
 const PostPage = ({ params }: { params: Promise<{ postId: string }> }) => {
   const [post, setPost] = useState<PostWithRelations | null>(null);
   const [loading, setLoading] = useState(true);
+  const [newComment, setNewComment] = useState('');
+  const [commentLoading, setCommentLoading] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -34,6 +16,37 @@ const PostPage = ({ params }: { params: Promise<{ postId: string }> }) => {
     };
     fetchPost();
   }, [params]);
+
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+
+    setCommentLoading(true);
+
+    try {
+      const { postId } = await params;
+      const response = await fetch('/api/posts/comment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ postId, content: newComment }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        setPost((prev) => prev && {
+          ...prev,
+          comments: [data.data, ...prev.comments],
+        });
+        setNewComment('');
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar comentário:', error);
+    }
+
+    setCommentLoading(false);
+  };
 
   return (
     <Box sx={{ padding: 4, margin: '0 auto', maxWidth: 800 }}>
@@ -162,13 +175,22 @@ const PostPage = ({ params }: { params: Promise<{ postId: string }> }) => {
             </Typography>
             <Divider sx={{ my: 2 }} />
             <Box display="flex" flexDirection="column" gap={2}>
-              {[1, 2, 3].map((_, index) => (
-                <Card key={index} sx={{ padding: 2, borderRadius: '8px' }}>
-                  <Typography variant="subtitle2" fontWeight="bold">
-                    Usuário {index + 1}
-                  </Typography>
+              {post.comments.map((comment) => (
+                <Card key={comment.id} sx={{ padding: 2, borderRadius: '8px' }}>
+                  <Box display="flex" alignItems="center" gap={2}>
+                    {comment.author.profilePhoto && comment.author.profilePhoto !== 'N/A' ? (
+                      <Avatar src={comment.author.profilePhoto} alt={comment.author.username} sx={{ width: 32, height: 32 }} />
+                    ) : (
+                      <Avatar sx={{ width: 32, height: 32, bgcolor: 'grey.400' }}>
+                        <FaUserCircle size={16} />
+                      </Avatar>
+                    )}
+                    <Typography variant="subtitle2" fontWeight="bold">
+                      {comment.author.username}
+                    </Typography>
+                  </Box>
                   <Typography variant="body2" color="text.secondary">
-                    Este é um comentário simulado.
+                    {comment.content}
                   </Typography>
                 </Card>
               ))}
@@ -181,9 +203,17 @@ const PostPage = ({ params }: { params: Promise<{ postId: string }> }) => {
               variant="outlined"
               multiline
               rows={3}
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
               sx={{ mt: 2 }}
             />
-            <Button variant="contained" color="primary" sx={{ mt: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2 }}
+              onClick={handleAddComment}
+              disabled={commentLoading}
+            >
               Enviar
             </Button>
           </Box>

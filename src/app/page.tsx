@@ -94,7 +94,7 @@ const Home = () => {
                   {post.gallery[0] ? (
                     <img src={post.gallery[0]} alt={post.title} className="w-full h-32 object-cover rounded-lg mb-3" />
                   ) : (
-                    <Box sx={{ backgroundColor: '#444', height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bbb' }}>
+                    <Box className="h-32" sx={{ backgroundColor: '#444', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bbb' }}>
                       Sem mídia
                     </Box>
                   )}
@@ -150,7 +150,7 @@ const Home = () => {
                     {project.description}
                   </Typography>
                   <Box sx={{ fontSize: '0.75rem', color: '#bbb', marginBottom: 1 }}>
-                    <span><strong>Orçamento:</strong> {project.budget}</span>
+                    <span><strong>Orçamento:</strong> {project.budget === 'A negociar' ? project.budget : "R$ " + project.budget}</span>
                   </Box>
                   <Box sx={{ fontSize: '0.75rem', color: '#bbb' }}>
                     <span><strong>Categorias:</strong> {project.hashtags.map((h, index) => (

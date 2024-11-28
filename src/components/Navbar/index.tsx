@@ -80,6 +80,19 @@ const Navbar = () => {
   // Usamos useMemo para criar uma versão memoizada do debounce
   const debounceSearch = useMemo(() => debounce(performSearch, 500), []);
 
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogOut = async () => {
+    await fetch('/api/auth/logout');
+    router.push('/login');
+  };
+
   return (
     <>
       <AppBar position="fixed" sx={{ background: 'linear-gradient(to right, #1f1f1f, #121212)' }}>
@@ -125,12 +138,49 @@ const Navbar = () => {
             </Box>
           </Box>
 
-          <Box>
-            <IconButton>
-              {user?.profilePhoto ? <Avatar src={user.profilePhoto} alt="Profile" /> : <Avatar sx={{ bgcolor: 'gray' }}>U</Avatar>}
-            </IconButton>
-          </Box>
-        </Toolbar>
+          {/* Perfil do Usuário */}
+        <Box>
+          <IconButton onClick={handleMenuOpen}>
+            {user && user.profilePhoto !== 'N/A' ? (
+              <Avatar src={user.profilePhoto} alt="Profile" />
+            ) : (
+              <Avatar sx={{ bgcolor: 'gray' }}>U</Avatar>
+            )}
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+            sx={{
+              '& .MuiPaper-root': {
+                backgroundColor: '#1f1f1f',
+                color: 'white',
+              },
+            }}
+            disableAutoFocusItem={true}
+            MenuListProps={{
+              disablePadding: true, // Adiciona este ajuste
+            }}
+          >
+            {user ? (
+              <>
+                <MenuItem>
+                  <Typography variant="subtitle2">Bem-vindo, {user.name}</Typography>
+                </MenuItem>
+                <MenuItem onClick={() => router.push('/profile')}>Perfil</MenuItem>
+                <MenuItem onClick={() => router.push('/project-aplications')}>Aplicações aos Meus Projetos</MenuItem>
+                <MenuItem onClick={handleLogOut}>Sair</MenuItem>
+              </>
+            ) : (
+              <>
+                <MenuItem onClick={() => router.push('/login')}>Login</MenuItem>
+                <MenuItem onClick={() => router.push('/signup')}>Cadastrar-se</MenuItem>
+                <MenuItem onClick={handleLogOut}>Sair</MenuItem>
+              </>
+            )}
+          </Menu>
+        </Box>
+      </Toolbar>
       </AppBar>
 
       <Popover

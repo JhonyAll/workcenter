@@ -25,6 +25,8 @@ const ProjectPage = ({ params }: { params: Promise<{ projectId: string }> }) => 
   const [openModal, setOpenModal] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
   const [proposedFee, setProposedFee] = useState<number | string>("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -32,14 +34,45 @@ const ProjectPage = ({ params }: { params: Promise<{ projectId: string }> }) => 
       const response = await fetch(`/api/projects/${projectId}`);
       const responseJson = await response.json();
       setProject(responseJson.data.project);
+      setLoading(false);
     };
     fetchProject();
   }, [params]);
 
-  const handleApply = () => {
-    // Simulação de envio de aplicação
-    console.log("Aplicando com proposta:", proposedFee, "e carta:", coverLetter);
-    setOpenModal(false); // Fecha o modal após envio
+  const handleApply = async () => {
+    if (!coverLetter.trim() || !proposedFee) {
+      setError("Todos os campos são obrigatórios.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { projectId } = await params;
+      const response = await fetch('/api/projects/applications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ projectId, coverLetter, proposedFee: Number(proposedFee) }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === 'success') {
+        console.log("Candidatura enviada com sucesso");
+        setOpenModal(false); // Fecha o modal após envio
+        setError(""); // Limpa o erro após envio bem-sucedido
+      } else {
+        console.error("Erro ao enviar candidatura:", data.message);
+        setError(data.message); // Define a mensagem de erro do servidor
+      }
+    } catch (error) {
+      console.error("Erro ao enviar candidatura:", error);
+      setError("Erro ao enviar candidatura. Tente novamente mais tarde.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -87,7 +120,6 @@ const ProjectPage = ({ params }: { params: Promise<{ projectId: string }> }) => 
             </Box>
           </Box>
 
-          {/* Botão Candidatar-se menor */}
           <Button 
             variant="contained" 
             color="primary" 
@@ -97,7 +129,6 @@ const ProjectPage = ({ params }: { params: Promise<{ projectId: string }> }) => 
             Candidatar-se
           </Button>
 
-          {/* Modal de Candidatura */}
           <Modal
             open={openModal}
             onClose={() => setOpenModal(false)}
@@ -107,15 +138,20 @@ const ProjectPage = ({ params }: { params: Promise<{ projectId: string }> }) => 
             <Box sx={{ 
               width: 400, 
               p: 3, 
-              backgroundColor: 'background.paper', // Usando a cor de fundo do tema
+              backgroundColor: 'background.paper', 
               borderRadius: 2, 
               margin: 'auto', 
               mt: 10,
-              color: 'text.primary', // Texto do modal
+              color: 'text.primary', 
             }}>
               <Typography id="apply-modal-title" variant="h6" component="h2" color="primary" fontWeight="bold">
                 Enviar Proposta
               </Typography>
+              {error && (
+                <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                  {error}
+                </Typography>
+              )}
               <TextField
                 id="cover-letter"
                 label="Carta de Apresentação"
@@ -136,8 +172,8 @@ const ProjectPage = ({ params }: { params: Promise<{ projectId: string }> }) => 
                 sx={{ mt: 2 }}
               />
               <Box mt={3}>
-                <Button variant="contained" color="primary" fullWidth onClick={handleApply}>
-                  Enviar Proposta
+                <Button variant="contained" color="primary" fullWidth onClick={handleApply} disabled={loading}>
+                  {loading ? "Enviando..." : "Enviar Proposta"}
                 </Button>
               </Box>
             </Box>
