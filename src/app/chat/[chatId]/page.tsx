@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from "react";
-import { Box, Typography, TextField, Button, Avatar, List, ListItem, Paper } from "@mui/material";
+import { useState, useEffect, useRef } from "react";
+import { Box, Typography, TextField, Button, Avatar, List, ListItem, Paper, Skeleton } from "@mui/material";
 import { Realtime } from "ably";
 import { useUser } from "@/context/UserContext";
 
@@ -30,6 +30,12 @@ const ChatPage = ({ params }: { params: Promise<{ chatId: string }> }) => {
     const [newMessage, setNewMessage] = useState<string>("");
     const [client, setClient] = useState<any>(null);
     const { user } = useUser();
+    const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
 
     useEffect(() => {
         const ably = new Realtime("AhHkng.vHEr2A:syObYTmOstswjhX2t3QPxVWXsx_kD3pcWgBsHH33MWY");
@@ -65,6 +71,12 @@ const ChatPage = ({ params }: { params: Promise<{ chatId: string }> }) => {
         fetchChat();
     }, [params]);
 
+    useEffect(() => {
+        if (chat) {
+            scrollToBottom();
+        }
+    }, [chat]);
+
     const handleSendMessage = async () => {
         const { chatId } = await params;
         if (newMessage.trim() && chatId) {
@@ -88,7 +100,45 @@ const ChatPage = ({ params }: { params: Promise<{ chatId: string }> }) => {
     };
 
     if (!chat) {
-        return <Typography>Carregando...</Typography>;
+        return (
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    height: "100%",
+                    padding: 2,
+                    backgroundColor: "#121212",
+                    color: "#FFFFFF",
+                }}
+            >
+                <Typography variant="h6" gutterBottom sx={{ textAlign: "center", color: "#BB86FC" }}>
+                    Carregando chat...
+                </Typography>
+
+                <Box
+                    sx={{
+                        flexGrow: 1,
+                        overflowY: "auto",
+                        marginBottom: 2,
+                        padding: 2,
+                        backgroundColor: "#1E1E1E",
+                        borderRadius: 2,
+                    }}
+                >
+                    {Array.from({ length: 5 }).map((_, index) => (
+                        <Box key={index} sx={{ display: "flex", marginBottom: 2 }}>
+                            <Skeleton variant="circular" width={40} height={40} sx={{ marginRight: 2 }} />
+                            <Skeleton variant="rectangular" height={40} width="80%" sx={{ borderRadius: 2 }} />
+                        </Box>
+                    ))}
+                </Box>
+
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    <Skeleton variant="rectangular" height={56} width="80%" sx={{ borderRadius: 2 }} />
+                    <Skeleton variant="rectangular" height={56} width={80} sx={{ borderRadius: 2 }} />
+                </Box>
+            </Box>
+        );
     }
 
     return (
@@ -148,10 +198,11 @@ const ChatPage = ({ params }: { params: Promise<{ chatId: string }> }) => {
                             </Paper>
                         </ListItem>
                     ))}
+                    <div ref={messagesEndRef} />
                 </List>
             </Box>
 
-            <Box  position="fixed" bottom="20px" sx={{ display: "flex", alignItems: "center", gap: 2, width: '70%' }}>
+            <Box position="fixed" bottom="20px" sx={{ display: "flex", alignItems: "center", gap: 2, width: '70%' }}>
                 <TextField
                     fullWidth
                     variant="outlined"

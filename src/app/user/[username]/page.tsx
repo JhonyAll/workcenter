@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef} from "react";
 import { AiOutlinePhone, AiOutlineMail, AiOutlineInstagram, AiOutlineLinkedin } from "react-icons/ai";
 import { BsChatText, BsFillStarFill } from "react-icons/bs";
 import { useRouter } from "next/navigation";
@@ -48,10 +48,11 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
     useEffect(() => {
         const fetchUser = async () => {
             const { username } = await params;
-            const user = await fetch(`/api/user/${username}`).then(response => response.json()).then(responseJson => setUser(responseJson.data.user));
+            const user = await fetch(`/api/users/${username}`).then(response => response.json()).then(responseJson => setUser(responseJson.data.user));
         };
         fetchUser();
     }, [params]);
+    
 
     // Função de contato (para envio de mensagem ou interação)
     const handleContact = async () => {
@@ -73,7 +74,18 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
     };
 
 
-    if (!user) return <>Carregando...</>;
+    if (!user) return (
+        <Container maxWidth="sm">
+        <Box display="flex" flexDirection="column" alignItems="center" gap={2} mt={5}>
+          <Skeleton variant="circular" width={120} height={120} />
+          <Skeleton variant="text" width="80%" height={30} />
+          <Skeleton variant="text" width="60%" height={20} />
+          <Divider sx={{ width: "100%", my: 2 }} />
+          <Skeleton variant="rectangular" width="100%" height={150} />
+          <Skeleton variant="rectangular" width="100%" height={250} sx={{ mt: 2 }} />
+        </Box>
+      </Container>
+    );
 
     return (
         <Container maxWidth="sm" sx={{ mt: 5 }}>

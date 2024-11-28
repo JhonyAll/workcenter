@@ -118,7 +118,7 @@ const Home = () => {
           )}
         </Grid>
         <Button variant="contained" sx={{ backgroundColor: '#9c4dcc', color: '#fff', marginTop: 3 }}>
-          Ver Mais
+          <Link href="/posts">Ver Mais</Link>
         </Button>
       </section>
 
@@ -169,8 +169,9 @@ const Home = () => {
             ))
           )}
         </Grid>
+        
         <Button variant="contained" sx={{ backgroundColor: '#9c4dcc', color: '#fff', marginTop: 3 }}>
-          Ver Mais
+          <Link href="/projects">Ver Mais</Link>
         </Button>
       </section>
 

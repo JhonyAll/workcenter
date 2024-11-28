@@ -29,7 +29,7 @@ const ProjectPage = ({ params }: { params: Promise<{ projectId: string }> }) => 
   useEffect(() => {
     const fetchProject = async () => {
       const { projectId } = await params;
-      const response = await fetch(`/api/project/${projectId}`);
+      const response = await fetch(`/api/projects/${projectId}`);
       const responseJson = await response.json();
       setProject(responseJson.data.project);
     };

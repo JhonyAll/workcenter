@@ -4,12 +4,27 @@ import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import cleanUserPasswords from "@/utils/cleanUsersPassword";
 
-
 // Função para a requisição GET
 export async function GET(req: NextRequest) {
   try {
+    // Recupera o parâmetro de consulta (query) da URL
+    const { searchParams } = new URL(req.url);
+    const query = searchParams.get('query');
+
+    // Condição para busca
+    const whereCondition = query
+      ? {
+          OR: [
+            { username: { contains: query, mode: 'insensitive' } },
+            { name: { contains: query, mode: 'insensitive' } },
+          ],
+        }
+      : {};
+
     // Recupera os usuários do banco e limpa as senhas antes de enviar
-    const users = cleanUserPasswords(await prisma.user.findMany());
+    const users = cleanUserPasswords(await prisma.user.findMany({
+      where: whereCondition,
+    }));
 
     // Retorna os dados dos usuários com um status de sucesso
     return NextResponse.json(
@@ -34,5 +49,3 @@ export async function GET(req: NextRequest) {
     );
   }
 }
-
-
