@@ -49,7 +49,7 @@ const Home = () => {
   };
 
   const handleFetchRecentsProjects = async () => {
-    const fetchApiProjects = await fetch('api/project?quant=3', { credentials: 'include', next: { revalidate: 100 }, method: 'GET' })
+    const fetchApiProjects = await fetch('api/projects?quant=3', { credentials: 'include', next: { revalidate: 100 }, method: 'GET' })
       .then(response => response.json())
       .then(response => response.data.projects);
 

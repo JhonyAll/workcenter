@@ -38,7 +38,7 @@ const PostsPage = () => {
                 const uniqueHashtags = Array.from(
                     new Set(data.posts.flatMap((post: PostWithRelations) => post.hashtags.map((tag) => tag.name)))
                 );
-                setHashtags(uniqueHashtags);
+                setHashtags(uniqueHashtags as string[]);
             }
         } catch (error) {
             console.error('Erro ao carregar posts:', error);

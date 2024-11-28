@@ -37,7 +37,7 @@ const ProjectsPage = () => {
                 const uniqueHashtags = Array.from(
                     new Set(data.projects.flatMap((post: ProjectWithRelations) => post.hashtags.map((tag) => tag.name)))
                 );
-                setHashtags(uniqueHashtags);
+                setHashtags(uniqueHashtags as string[]);
             }
         } catch (error) {
             console.error('Erro ao carregar projetos:', error);
