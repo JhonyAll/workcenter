@@ -6,6 +6,7 @@ import { Box, Typography, Avatar, Button, Modal, TextField, Skeleton } from "@mu
 import Image from "next/image";
 import Link from "next/link";
 import { FaUserCircle } from "react-icons/fa";
+import { useUser } from "@/context/UserContext";
 
 type ProjectWithRelations = Prisma.ProjectGetPayload<{
   include: {
@@ -25,12 +26,16 @@ const ProjectPage = ({ params }: { params: Promise<{ projectId: string }> }) => 
   const [openModal, setOpenModal] = useState(false);
   const [coverLetter, setCoverLetter] = useState("");
   const [proposedFee, setProposedFee] = useState<number | string>("");
+  const [idProject, setIdProject] = useState<string>("")
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  
+  const { user } = useUser()
 
   useEffect(() => {
     const fetchProject = async () => {
       const { projectId } = await params;
+      setIdProject(projectId)
       const response = await fetch(`/api/projects/${projectId}`);
       const responseJson = await response.json();
       setProject(responseJson.data.project);
@@ -120,14 +125,17 @@ const ProjectPage = ({ params }: { params: Promise<{ projectId: string }> }) => 
             </Box>
           </Box>
 
-          <Button 
-            variant="contained" 
-            color="primary" 
-            onClick={() => setOpenModal(true)} 
-            sx={{ mt: 2, padding: "6px 12px", fontSize: "0.875rem" }}
-          >
-            Candidatar-se
-          </Button>
+{
+  !(user?.id === project.authorId) &&  <Button 
+  variant="contained" 
+  color="primary" 
+  onClick={() => setOpenModal(true)} 
+  sx={{ mt: 2, padding: "6px 12px", fontSize: "0.875rem" }}
+>
+  Candidatar-se
+</Button>
+}
+         
 
           <Modal
             open={openModal}
