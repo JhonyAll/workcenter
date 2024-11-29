@@ -105,7 +105,7 @@ const Navbar = () => {
 
           <Box
             sx={{
-              display: { xs: 'none', md: 'flex' },
+              display: { md: 'flex' },
               flexGrow: 1,
               justifyContent: 'center',
               mx: 2,
@@ -119,7 +119,7 @@ const Navbar = () => {
                 borderRadius: 2,
                 px: 2,
                 py: 0.5,
-                width: '50%',
+                width: {md: '50%', sm: '100%'},
               }}
             >
               <SearchIcon sx={{ color: 'gray', mr: 1 }} />
@@ -171,6 +171,7 @@ const Navbar = () => {
                 <MenuItem onClick={() => router.push('/project-aplications')}>Aplicações aos Meus Projetos</MenuItem>
                 <MenuItem onClick={() => router.push('/my-projects')}>Meus Projetos</MenuItem>
                 <MenuItem onClick={() => router.push('/my-posts')}>Meus Posts</MenuItem>
+                <MenuItem onClick={() => router.push('/my-chats')}>Meus Chats</MenuItem>
                 <MenuItem onClick={handleLogOut}>Sair</MenuItem>
               </>
             ) : (
