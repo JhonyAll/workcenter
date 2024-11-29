@@ -21,14 +21,22 @@ import { AiOutlinePhone, AiOutlineInstagram, AiOutlineTwitter } from "react-icon
 import { IoMdSettings } from "react-icons/io";
 import Link from "next/link";
 // Interfaces
+// Ajuste na interface
 interface WorkerProfile {
   id: string;
   userId: string;
   profession: string;
   skills: { id: string; name: string; category: string | null }[];
   contactInfo: string | null;
-  portfolio: { id: string; title: string; description: string; image: string | null; link: string | null }[];
+  portfolio: { 
+    id: string; 
+    title: string; 
+    description: string | null; // Permitir null no description
+    image: string | null; 
+    link: string | null 
+  }[];
 }
+
 
 const WorkerProfilePage = () => {
   const { user, isLoading } = useUser();
