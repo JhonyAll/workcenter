@@ -169,6 +169,8 @@ const Navbar = () => {
                 </MenuItem>
                 <MenuItem onClick={() => router.push('/profile')}>Perfil</MenuItem>
                 <MenuItem onClick={() => router.push('/project-aplications')}>Aplicações aos Meus Projetos</MenuItem>
+                <MenuItem onClick={() => router.push('/my-projects')}>Meus Projetos</MenuItem>
+                <MenuItem onClick={() => router.push('/my-posts')}>Meus Posts</MenuItem>
                 <MenuItem onClick={handleLogOut}>Sair</MenuItem>
               </>
             ) : (

@@ -29,7 +29,7 @@ const ProjectPage = ({ params }: { params: Promise<{ projectId: string }> }) => 
   const [idProject, setIdProject] = useState<string>("")
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  
+
   const { user } = useUser()
 
   useEffect(() => {
@@ -125,17 +125,17 @@ const ProjectPage = ({ params }: { params: Promise<{ projectId: string }> }) => 
             </Box>
           </Box>
 
-{
-  !(user?.id === project.authorId) &&  <Button 
-  variant="contained" 
-  color="primary" 
-  onClick={() => setOpenModal(true)} 
-  sx={{ mt: 2, padding: "6px 12px", fontSize: "0.875rem" }}
->
-  Candidatar-se
-</Button>
-}
-         
+          {
+            (!(user?.id === project.authorId) || user.type !== "CLIENT") && <Button
+              variant="contained"
+              color="primary"
+              onClick={() => setOpenModal(true)}
+              sx={{ mt: 2, padding: "6px 12px", fontSize: "0.875rem" }}
+            >
+              Candidatar-se
+            </Button>
+          }
+
 
           <Modal
             open={openModal}
@@ -143,14 +143,14 @@ const ProjectPage = ({ params }: { params: Promise<{ projectId: string }> }) => 
             aria-labelledby="apply-modal-title"
             aria-describedby="apply-modal-description"
           >
-            <Box sx={{ 
-              width: 400, 
-              p: 3, 
-              backgroundColor: 'background.paper', 
-              borderRadius: 2, 
-              margin: 'auto', 
+            <Box sx={{
+              width: 400,
+              p: 3,
+              backgroundColor: 'background.paper',
+              borderRadius: 2,
+              margin: 'auto',
               mt: 10,
-              color: 'text.primary', 
+              color: 'text.primary',
             }}>
               <Typography id="apply-modal-title" variant="h6" component="h2" color="primary" fontWeight="bold">
                 Enviar Proposta

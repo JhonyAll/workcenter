@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect, useRef} from "react";
-import { AiOutlinePhone, AiOutlineMail, AiOutlineInstagram, AiOutlineLinkedin } from "react-icons/ai";
+import { useState, useEffect, useRef } from "react";
+import { AiOutlinePhone, AiOutlineMail, AiOutlineInstagram, AiOutlineLinkedin, AiOutlineTwitter } from "react-icons/ai";
 import { BsChatText, BsFillStarFill } from "react-icons/bs";
 import { useRouter } from "next/navigation";
 import {
@@ -32,10 +32,14 @@ type UserWithWorkProfile = Prisma.UserGetPayload<{
         type: true;
         createdAt: true;
         updatedAt: true;
+        instagram: true;
+        twitter: true;
+        phone: true;
         about: true;
         WorkerProfile: {
             include: {
                 skills: true;
+                portfolio: true;
             }
         };
     };
@@ -52,7 +56,7 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
         };
         fetchUser();
     }, [params]);
-    
+
 
     // Função de contato (para envio de mensagem ou interação)
     const handleContact = async () => {
@@ -76,15 +80,15 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
 
     if (!user) return (
         <Container maxWidth="sm">
-        <Box display="flex" flexDirection="column" alignItems="center" gap={2} mt={5}>
-          <Skeleton variant="circular" width={120} height={120} />
-          <Skeleton variant="text" width="80%" height={30} />
-          <Skeleton variant="text" width="60%" height={20} />
-          <Divider sx={{ width: "100%", my: 2 }} />
-          <Skeleton variant="rectangular" width="100%" height={150} />
-          <Skeleton variant="rectangular" width="100%" height={250} sx={{ mt: 2 }} />
-        </Box>
-      </Container>
+            <Box display="flex" flexDirection="column" alignItems="center" gap={2} mt={5}>
+                <Skeleton variant="circular" width={120} height={120} />
+                <Skeleton variant="text" width="80%" height={30} />
+                <Skeleton variant="text" width="60%" height={20} />
+                <Divider sx={{ width: "100%", my: 2 }} />
+                <Skeleton variant="rectangular" width="100%" height={150} />
+                <Skeleton variant="rectangular" width="100%" height={250} sx={{ mt: 2 }} />
+            </Box>
+        </Container>
     );
 
     return (
@@ -141,7 +145,7 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
             </Card>
 
             {/* Avaliação */}
-            {user.WorkerProfile && (
+            {/* {user.WorkerProfile && (
                 <Box display="flex" alignItems="center" gap={1} mb={3}>
                     <BsFillStarFill color="#FFD700" />
                     <Typography variant="h6">{user.WorkerProfile.rating || "N/A"}</Typography>
@@ -149,7 +153,7 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
                         ({user.WorkerProfile.completedTasks} tarefas concluídas)
                     </Typography>
                 </Box>
-            )}
+            )} */}
 
             {/* Habilidades */}
             {user.WorkerProfile?.skills && user.WorkerProfile?.skills?.length > 0 && (
@@ -173,28 +177,47 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
                     <Typography variant="h6" fontWeight="bold" gutterBottom>
                         Contatos
                     </Typography>
-                    {/* <Box display="flex" alignItems="center" gap={1} mb={1}>
-                        <AiOutlinePhone />
-                        <Typography color="textSecondary">{user.phone || "Não disponível"}</Typography>
-                    </Box> */}
-                    <Box display="flex" alignItems="center" gap={1} mb={1}>
-                        <AiOutlineMail />
-                        <Typography color="textSecondary">{user.email || "Não disponível"}</Typography>
+                    <Box>
+                        <Typography color="textSecondary" mb={1}>
+                            <AiOutlinePhone /> {user.phone || "Não informado"}
+                        </Typography>
+                        <Typography color="textSecondary" mb={1}>
+                            <AiOutlineInstagram /> {user.instagram || "Não informado"}
+                        </Typography>
+                        <Typography color="textSecondary">
+                            <AiOutlineTwitter /> {user.twitter || "Não informado"}
+                        </Typography>
                     </Box>
-                    {/* <Box display="flex" alignItems="center" gap={1} mb={1}>
-                        <AiOutlineInstagram />
-                        <a href={user.WorkerProfile?.socialLinks?.instagram || "#"} target="_blank" rel="noopener noreferrer">
-                            Instagram
-                        </a>
-                    </Box>
-                    <Box display="flex" alignItems="center" gap={1}>
-                        <AiOutlineLinkedin />
-                        <a href={user.WorkerProfile?.socialLinks?.linkedin || "#"} target="_blank" rel="noopener noreferrer">
-                            LinkedIn
-                        </a>
-                    </Box> */}
+
+
                 </CardContent>
             </Card>
+
+            {user.type === "WORKER" && (
+                < Card sx={{ mb: 3 }}>
+                    <CardContent>
+                        <Typography variant="h6" fontWeight="bold" gutterBottom>
+                            Portfolio
+                        </Typography>
+                        {user.WorkerProfile?.portfolio && user.WorkerProfile?.portfolio.length > 0 ? (
+                            user.WorkerProfile?.portfolio.map((item) => (
+                                <Box key={item.id} mb={2} sx={{ wdith: '100%' }}>
+                                    <a href={("https://" + item.link) || ''}>
+                                        <Typography variant="subtitle1" fontWeight="bold">
+                                            {item.title}
+                                        </Typography>
+                                        <Typography variant="body2">{item.description}</Typography>
+                                    </a>
+                                </Box>
+                            ))
+                        ) : (<>
+                            <Typography color="textSecondary">Nenhum item no portfólio.</Typography>
+                        </>
+                        )}
+                    </CardContent>
+                </Card>
+            )}
+
 
             {/* Portfólio */}
             {/* {user.WorkerProfile?.portfolio && user.WorkerProfile?.portfolio?.length > 0 && (
@@ -229,7 +252,7 @@ const WorkerProfilePage = ({ params }: { params: Promise<{ username: string }> }
                     </Grid>
                 </Box>
             )} */}
-        </Container>
+        </Container >
     );
 };
 

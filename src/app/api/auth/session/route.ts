@@ -34,7 +34,8 @@ export async function GET(req: NextRequest) {
       twitter: true,
       WorkerProfile: {
         include: {
-          skills: true
+          skills: true,
+          portfolio: true
         }
       }
     },

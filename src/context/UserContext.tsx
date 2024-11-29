@@ -20,7 +20,8 @@ type UserWithWorkProfile = Prisma.UserGetPayload<{
     about: true,
     WorkerProfile: {
       include: {
-        skills: true
+        skills: true,
+        portfolio: true
       }
     }
   }
@@ -69,6 +70,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(null);
         return router.push("/login")
       }
+      console.log(data.user)
       setUser(data.user);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Erro desconhecido.");

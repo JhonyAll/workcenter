@@ -24,9 +24,13 @@ export async function GET(
         profilePhoto: true,
         createdAt: true,
         updatedAt: true,
+        instagram: true,
+        twitter: true,
+        phone: true,
         WorkerProfile: {
           include: {
-            skills: true
+            skills: true,
+            portfolio: true
           }
         }
       },

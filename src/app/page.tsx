@@ -176,7 +176,7 @@ const Home = () => {
       </section>
 
       {/* Seção de Freelancers */}
-      <section>
+      {/* <section>
         <Typography variant="h4" sx={{ fontWeight: 600, color: '#fff', marginBottom: 4 }}>
           Freelancers Sugeridos
         </Typography>
@@ -217,7 +217,7 @@ const Home = () => {
         <Button variant="contained" sx={{ backgroundColor: '#9c4dcc', color: '#fff', marginTop: 3 }}>
           Ver Mais
         </Button>
-      </section>
+      </section> */}
 
       <CreateMenuButton />
     </Box>
